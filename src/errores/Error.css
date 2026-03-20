@@ -1,0 +1,202 @@
+.error-page-wrapper {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, rgba(1, 68, 149, 0.1) 0%, rgba(63, 159, 214, 0.2) 100%),
+        url("/imagenes/fondo404.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.error-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInDown 1s ease-in-out;
+    margin-bottom: 20px;
+}
+
+.error-header img {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 8px 16px rgba(1, 68, 149, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.error-header img:hover {
+    transform: scale(1.05);
+}
+
+.error-header h1 {
+    font-size: 4rem;
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: #014495;
+    text-shadow: 0 0 20px rgba(63, 159, 214, 0.5),
+        0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.error-message {
+    text-align: center;
+    margin: 30px 0;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+.error-message h3 {
+    margin: 15px 0;
+    font-weight: 500;
+    font-size: 1.5rem;
+    color: #014495;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    line-height: 1.6;
+}
+
+.error-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    animation: fadeInUp 1.8s ease-in-out;
+}
+
+.btn-home {
+    text-decoration: none;
+    padding: 16px 70px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #014495 0%, #0056b3 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 20px rgba(1, 68, 149, 0.3);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 1px;
+}
+
+.btn-home::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-home:hover::before {
+    left: 100%;
+}
+
+.btn-home:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+    color: #014495;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(1, 68, 149, 0.4);
+}
+
+.btn-home:active {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(1, 68, 149, 0.3);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+
+@media (max-width: 768px) {
+    .error-header h1 {
+        font-size: 2.5rem;
+        letter-spacing: 4px;
+    }
+
+    .error-header img {
+        max-width: 300px;
+    }
+
+    .error-message h3 {
+        font-size: 1.2rem;
+    }
+
+    .btn-home {
+        padding: 14px 50px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .error-header h1 {
+        font-size: 2rem;
+        letter-spacing: 2px;
+    }
+
+    .error-header img {
+        max-width: 250px;
+    }
+
+    .error-message h3 {
+        font-size: 1rem;
+    }
+
+    .btn-home {
+        padding: 12px 40px;
+        font-size: 0.95rem;
+    }
+}
