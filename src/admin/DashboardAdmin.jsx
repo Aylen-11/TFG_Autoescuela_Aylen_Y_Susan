@@ -124,7 +124,6 @@ function SelectorRolNumerico({ valor, onChange }) {
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA CAMBIAR EL ROL DE UN USUARIO (ADMINISTRADORES Y PROFESORES)
-
 function ModalCambiarRol({ visible, usuario, onGuardar, onCerrar }) {
   const [rolSeleccionado, setRolSeleccionado] = useState("");
 
@@ -232,89 +231,75 @@ function ModalEditarUsuario({ visible, usuario, tipo, onGuardar, onCerrar }) {
 /* añadir matricula WIP
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA AÑADIR UN NUEVA MATRICULA(ALUMNO Y CLIENTE)
-function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
+function ModalAnadirMatricula({ visible, onGuardar, onCerrar, usuario }) {
   const [form, setForm] = useState({
-    username: "",
-    nombre: "",
-    password: "",
-    apellidos: "",
-    dni: "",
-    fechaNacimiento: "",
-    direccion: "",
-    telefono: "",
-    rol: rolPorDefecto || "3", // Por defecto, el rol será "Alumno" (3) si no se especifica otro
+    psicotecnico: "",
+    pago: "",
+    tasaDgt: "",
+    usernameAlumno: "",
+    usernameProfesor: "",
+    tiposCarnet: "",
+    idVehiculo: "",
+    tipoPaquete: "",
+    fechaTeorico: "",
+    fechaPractico: ""
   });
-
-  useEffect(() => {
-    setForm((f) => ({ ...f, rol: rolPorDefecto || "1" }));
-  }, [rolPorDefecto, visible]);
 
   const cambiar = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }));
 
   const guardar = () => {
-    if (!form.username || !form.nombre || !form.apellidos || !form.password) {
-      alert("Rellena al menos username, nombre, apellidos y contraseña.");
+    if (!form) {
+      alert("Rellena todos los campos.");
       return;
     }
-
 
     onGuardar(form);
   };
 
-  const nombreRol = { "1": "Administrador", "2": "Profesor", "3": "Alumno", "4": "Cliente" };
-
   return (
-    <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir ${nombreRol[form.rol]}`}>
+    <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir matrícula para ${usuario?.username}`}>
       <div className="modal-anadir-cuerpo">
-        <div className="anadir-campo-full">
-          <label className="campo-label">Rol</label>
-          <SelectorRolNumerico valor={form.rol} onChange={(v) => cambiar("rol", v)} />
-        </div>
         <div className="anadir-grid">
           {[
-            { campo: "username", label: "Username / Email", tipo: "email" },
-            { campo: "password", label: "Contraseña", tipo: "password" },
-            { campo: "nombre", label: "Nombre", tipo: "text" },
-            { campo: "apellidos", label: "Apellidos", tipo: "text" },
-            { campo: "fechaNacimiento", label: "Fecha nacimiento", tipo: "date" },
-            { campo: "direccion", label: "Dirección", tipo: "text" },
-            { campo: "telefono", label: "Teléfono", tipo: "tel" },
+            { campo: "Psicotecnico", label: "¿Tiene el psicotecnico?", tipo: "boolean" },
+            { campo: "pago", label: "¿Tiene todo pagado ya?", tipo: "boolean" },
+            { campo: "tasaDgt", label: "¿Tiene pagada la tasa de la DGT?", tipo: "boolean" },
+            { campo: "Alumno", label: "Alumno asignado", tipo: "text" },
+            { campo: "Profesor", label: "Profesor asignado", tipo: "text" },
+            { campo: "Carnet", label: "Tipo de carnet", tipo: "text" },
+            { campo: "Vehiculo", label: "Numero de vehiculo asignado", tipo: "text" },
+            { campo: "Paquete", label: "Tipo de paquete", tipo: "text" },
+            { campo: "Fecha examen teorico", label: "Fecha", tipo: "date" },
+            { campo: "Fecha examen practico", label: "Fecha", tipo: "date" },
           ].map(({ campo, label, tipo }) => (
             <div key={campo} className="anadir-campo">
               <label className="campo-label">{label}</label>
-              <input className="campo-input" type={tipo} value={form[campo]}
-                onChange={(e) => cambiar(campo, e.target.value)}
-                placeholder={label}
-              />
+              {tipo === "boolean" ? (
+                <button
+                  type="button"
+                  className={`info-badge ${form[campo] ? "badge-si" : "badge-no"}`}
+                  onClick={() => cambiar(campo, !form[campo])}
+                >
+                  {form[campo] ? "Sí" : "No"}
+                </button>
+              ) : (
+                <input
+                  className="campo-input"
+                  type={tipo}
+                  value={form[campo]}
+                  onChange={(e) => cambiar(campo, e.target.value)}
+                  placeholder={label}
+                />
+              )}
             </div>
           ))}
-          <div className="anadir-campo">
-            <label className="campo-label">DNI</label>
-            <input
-              className="campo-input"
-              type="text"
-              inputMode="numeric"
-              maxLength={10}
-              value={form.dni}
-              onChange={(e) => {
-                const valor = e.target.value.toUpperCase();
-                const regex = /^[0-9]{0,8}[A-Z]?$/;
-
-                if (regex.test(valor)) {
-                  cambiar("dni", valor);
-                }
-              }
-              }
-              placeholder="12345678Z"
-            />
-          </div>
         </div>
-        <button className="btn-guardar-usuario" onClick={guardar}>Crear {nombreRol[form.rol]}</button>
       </div>
+      <button className="btn-guardar-usuario" onClick={guardar}>Crear</button>
     </Modal>
   );
-}
-*/
+}*/
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA VER INFORMACIÓN COMPLETA DE UN USUARIO (SOLO EN ALUMNOS Y CLIENTES)
@@ -394,8 +379,8 @@ function ModalVerInfo({ visible, usuario, onCerrar }) {
             ))
           ) : (
             <>
-            <p className="sin-matricula">Este usuario no tiene matrícula registrada. ¿Quiere registrar una nueva matricula?</p>
-            <button>Añadir matricula</button> {/*BOTON AÑADIR MATRICULAAA*/}
+              <p className="sin-matricula">Este usuario no tiene matrícula registrada. ¿Quiere registrar una nueva matricula?</p>
+              <button>Añadir matricula</button> {/*BOTON AÑADIR MATRICULAAA*/}
             </>
           )}
         </div>
@@ -409,18 +394,18 @@ function ModalVerInfo({ visible, usuario, onCerrar }) {
 function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
   const [form, setForm] = useState({
     username: "",
-    nombre: "",
     password: "",
-    apellidos: "",
     dni: "",
+    nombre: "",
+    apellidos: "",
     fechaNacimiento: "",
     direccion: "",
     telefono: "",
-    rol: rolPorDefecto || "1",
+    idRol: rolPorDefecto || "4", // Si no se especifica, por defecto cliente
   });
 
   useEffect(() => {
-    setForm((f) => ({ ...f, rol: rolPorDefecto || "1" }));
+    setForm((f) => ({ ...f, idRol: rolPorDefecto || "4" })); //
   }, [rolPorDefecto, visible]);
 
   const cambiar = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }));
@@ -430,19 +415,27 @@ function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
       alert("Rellena al menos username, nombre, apellidos y contraseña.");
       return;
     }
+    const payload = {
+      ...form,
+      rol: {
+        idRol: Number(form.idRol),
+      },
+    };
 
+    delete payload.idRol;
 
-    onGuardar(form);
+    console.log(payload);
+    onGuardar(payload);
   };
 
-  const nombreRol = { "1": "Administrador", "2": "Profesor", "3": "Alumno", "4": "Cliente" };
+  const nombreRol = { 1: "Administrador", 2: "Profesor", 3: "Alumno", 4: "Cliente" };
 
   return (
     <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir ${nombreRol[form.rol]}`}>
       <div className="modal-anadir-cuerpo">
         <div className="anadir-campo-full">
           <label className="campo-label">Rol</label>
-          <SelectorRolNumerico valor={form.rol} onChange={(v) => cambiar("rol", v)} />
+          <SelectorRolNumerico valor={form.idRol} onChange={(v) => cambiar("idRol", v)} />
         </div>
         <div className="anadir-grid">
           {[
@@ -452,7 +445,7 @@ function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
             { campo: "apellidos", label: "Apellidos", tipo: "text" },
             { campo: "fechaNacimiento", label: "Fecha nacimiento", tipo: "date" },
             { campo: "direccion", label: "Dirección", tipo: "text" },
-            { campo: "telefono", label: "Teléfono", tipo: "tel" },
+            // { campo: "telefono", label: "Teléfono", tipo: "tel" },
           ].map(({ campo, label, tipo }) => (
             <div key={campo} className="anadir-campo">
               <label className="campo-label">{label}</label>
@@ -462,6 +455,25 @@ function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
               />
             </div>
           ))}
+          <div className="anadir-campo">
+            <label className="campo-label">Teléfono</label>
+            <input
+              className="campo-input"
+              type="text"
+              inputMode="numeric"
+              maxLength={9}
+              value={form.telefono}
+              onChange={(e) => {
+                const valor = e.target.value;
+                const regex = /^[0-9]{0,9}$/;
+                if (regex.test(valor)) {
+                  cambiar("telefono", valor);
+                }
+              }}
+              placeholder="612345678"
+            />
+          </div>
+
           <div className="anadir-campo">
             <label className="campo-label">DNI</label>
             <input
@@ -1120,13 +1132,17 @@ function DashboardAdmin() {
   const guardarNuevoUsuario = async (datos) => {
     const headers = obtenerAuthHeaders();
     try {
-      const res = await fetch("http://localhost:9002/usuarios/crear", {
+      const res = await fetch("http://localhost:9002/usuarios/alta", {
         method: "POST",
         headers,
         body: JSON.stringify(datos),
       });
       if (res.ok) mostrarAlerta("¡Usuario creado correctamente!", "exito");
-      else mostrarAlerta("Error al crear el usuario.", "error");
+      else {
+        // Leer el mensaje del backend
+        const data = await res.text(); 
+        mostrarAlerta(data || "Error al crear el usuario.", "error");
+      }
     } catch (e) {
       mostrarAlerta("Error de conexión.", "error");
     }
@@ -1182,5 +1198,5 @@ function DashboardAdmin() {
     </div>
   );
 }
-//hasta aquiii 
+
 export default DashboardAdmin;

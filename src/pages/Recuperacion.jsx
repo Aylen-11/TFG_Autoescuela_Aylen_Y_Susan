@@ -44,7 +44,6 @@ const handlePhoneInput = (e, setter, field, form) => {
     setter({ ...form, [field]: val });
 };
 
-//holaaaa
 
 function RecuperacionPuntos() {
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });

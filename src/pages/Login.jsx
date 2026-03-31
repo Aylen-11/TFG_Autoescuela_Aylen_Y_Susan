@@ -38,7 +38,7 @@ function Login() {
       });
 
       if (envioRespuesta.ok) {
-        window.alert("Registro exitoso, ya puedes iniciar sesión");
+        //window.alert("Registro exitoso, ya puedes iniciar sesión");
         try {
           const buscarIdPorEmail = await fetch(`http://localhost:9002/usuarios/buscarrol/${registro.username}`, {
             method: "GET",
@@ -48,6 +48,7 @@ function Login() {
           });
           if (buscarIdPorEmail.ok) {
             const id = await buscarIdPorEmail.text();
+            console.log("usuario REGISTRADO correctamente!")
             console.log("ID recibido del backend:", id);
             console.log("redirigiendo...")
             switch (id) {
@@ -67,7 +68,7 @@ function Login() {
         window.alert("Error en el registro, este correo ya esta registrado.");
       }
 
-      console.log("usuario REGISTRADO correctamente!")
+      //console.log("usuario REGISTRADO correctamente!")
     } catch (error) {
       console.log("Error fetch REGISTER")
       window.alert("Error en el registro, por favor revise los datos introducidos");
@@ -101,7 +102,7 @@ function Login() {
       });
 
       if (envioRespuesta.ok) {
-        window.alert("Login exitoso");
+        //window.alert("Login exitoso");
         try {
           const buscarIdPorEmail = await fetch(`http://localhost:9002/usuarios/buscarrol/${login.username}`, {
             method: "GET",
