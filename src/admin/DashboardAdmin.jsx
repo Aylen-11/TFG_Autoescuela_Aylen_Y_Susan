@@ -228,14 +228,14 @@ function ModalEditarUsuario({ visible, usuario, tipo, onGuardar, onCerrar }) {
   );
 }
 
-/* añadir matricula WIP
+// añadir matricula WIP
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA AÑADIR UN NUEVA MATRICULA(ALUMNO Y CLIENTE)
-function ModalAnadirMatricula({ visible, onGuardar, onCerrar, usuario }) {
+function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAlerta }) {
   const [form, setForm] = useState({
-    psicotecnico: "",
-    pago: "",
-    tasaDgt: "",
+    psicotecnico: false,
+    pago: false,
+    tasaDgt: false,
     usernameAlumno: "",
     usernameProfesor: "",
     tiposCarnet: "",
@@ -245,32 +245,53 @@ function ModalAnadirMatricula({ visible, onGuardar, onCerrar, usuario }) {
     fechaPractico: ""
   });
 
+  // Al abrir el modal, autocompleta el usernameAlumno
+  useEffect(() => {
+    if (visible && usuario) {
+      setForm((f) => ({ ...f, usernameAlumno: usuario }));
+    }
+  }, [visible, usuario]);
+
   const cambiar = (campo, valor) => setForm((f) => ({ ...f, [campo]: valor }));
 
-  const guardar = () => {
+  const guardarMatricula = async () => {
     if (!form) {
-      alert("Rellena todos los campos.");
+      alert("Completa todos los campos");
       return;
     }
-
-    onGuardar(form);
+    console.log("Guardando matrícula con datos:", form);
+    const headers = obtenerAuthHeaders();
+    try {
+      const res = await fetch('http://localhost:9002/matricula/alta-dto', { //<- lo ha escrito alvaro :D
+        method: "PUT",
+        headers:{ "Content-Type": "application/json"},
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        mostrarAlerta("¡Matrícula creada correctamente!", "exito");
+      } else {
+        mostrarAlerta("Error al registrar la matrícula.", "error");
+      }
+    } catch (e) {
+      mostrarAlerta("Error de conexión.", "error");
+    }
+    onCerrar();
   };
 
   return (
-    <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir matrícula para ${usuario?.username}`}>
+    <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir matrícula para ${usuario}`}>
       <div className="modal-anadir-cuerpo">
         <div className="anadir-grid">
           {[
-            { campo: "Psicotecnico", label: "¿Tiene el psicotecnico?", tipo: "boolean" },
+            { campo: "psicotecnico", label: "¿Tiene el psicotécnico?", tipo: "boolean" },
             { campo: "pago", label: "¿Tiene todo pagado ya?", tipo: "boolean" },
             { campo: "tasaDgt", label: "¿Tiene pagada la tasa de la DGT?", tipo: "boolean" },
-            { campo: "Alumno", label: "Alumno asignado", tipo: "text" },
-            { campo: "Profesor", label: "Profesor asignado", tipo: "text" },
-            { campo: "Carnet", label: "Tipo de carnet", tipo: "text" },
-            { campo: "Vehiculo", label: "Numero de vehiculo asignado", tipo: "text" },
-            { campo: "Paquete", label: "Tipo de paquete", tipo: "text" },
-            { campo: "Fecha examen teorico", label: "Fecha", tipo: "date" },
-            { campo: "Fecha examen practico", label: "Fecha", tipo: "date" },
+            { campo: "usernameProfesor", label: "Profesor asignado", tipo: "text" },
+            { campo: "tiposCarnet", label: "Tipo de carnet", tipo: "text" },
+            { campo: "idVehiculo", label: "Número de vehículo asignado", tipo: "text" },
+            { campo: "tipoPaquete", label: "Tipo de paquete", tipo: "text" },
+            { campo: "fechaTeorico", label: "Fecha examen teórico", tipo: "date" },
+            { campo: "fechaPractico", label: "Fecha examen práctico", tipo: "date" },
           ].map(({ campo, label, tipo }) => (
             <div key={campo} className="anadir-campo">
               <label className="campo-label">{label}</label>
@@ -293,20 +314,30 @@ function ModalAnadirMatricula({ visible, onGuardar, onCerrar, usuario }) {
               )}
             </div>
           ))}
+
+          {/* Campo usernameAlumno autocompletado y solo lectura */}
+          <div className="anadir-campo">
+            <label className="campo-label">Alumno asignado</label>
+            <input
+              className="campo-input"
+              type="text"
+              value={form.usernameAlumno}
+              readOnly
+              style={{ opacity: 0.6, cursor: "not-allowed" }}
+            />
+          </div>
         </div>
       </div>
-      <button className="btn-guardar-usuario" onClick={guardar}>Crear</button>
+      <button className="btn-guardar-usuario" onClick={guardarMatricula}>Crear</button>
     </Modal>
   );
-}*/
+}
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA VER INFORMACIÓN COMPLETA DE UN USUARIO (SOLO EN ALUMNOS Y CLIENTES)
-function ModalVerInfo({ visible, usuario, onCerrar }) {
-  if (!visible || !usuario) return null;
-  // const m = usuario.matricula || null;
-
+function ModalVerInfo({ visible, usuario, onCerrar, mostrarAlerta }) {
+  const [modalNuevaMatricula, setModalNuevaMatricula] = useState(false);
   const [matricula, setMatricula] = useState([]);
 
   const cargarMatriculaAlumno = async () => {
@@ -319,73 +350,86 @@ function ModalVerInfo({ visible, usuario, onCerrar }) {
     } catch (e) { console.log("Error en fetch admins", e); }
   };
 
-  useEffect(() => { cargarMatriculaAlumno(); }, []);
+  useEffect(() => {
+    if (visible && usuario) cargarMatriculaAlumno();
+  }, [visible, usuario]);
+
+
+  if (!visible || !usuario) return null;
 
   return (
-    <div className="modal-fondo" onClick={onCerrar}>
-      <div className="modal-info-caja" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-info-cabecera">
-          <div>
-            <h3 className="modal-info-nombre">{usuario.nombre} {usuario.apellidos}</h3>
-            <p className="modal-info-correo">{usuario.username}</p>
-          </div>
-          <button className="modal-cerrar-btn" onClick={onCerrar}>✕</button>
-        </div>
-        <div className="modal-info-cuerpo">
-          <div className="info-grupo info-personal">
-            <h4 className="info-grupo-titulo">Datos personales</h4>
-            <div className="info-grid">
-              <div className="info-campo"><span className="info-label">DNI</span><span className="info-valor">{usuario.dni || "—"}</span></div>
-              <div className="info-campo"><span className="info-label">Fecha nacimiento</span><span className="info-valor">{usuario.fechaNacimiento || "—"}</span></div>
-              <div className="info-campo"><span className="info-label">Dirección</span><span className="info-valor">{usuario.direccion || "—"}</span></div>
-              <div className="info-campo"><span className="info-label">Fecha registro</span><span className="info-valor">{usuario.fechaRegistro || "—"}</span></div>
-              <div className="info-campo"><span className="info-label">Teléfono</span><span className="info-valor">{usuario.telefono || "—"}</span></div>
+    <>
+      <div className="modal-fondo" onClick={onCerrar}>
+        <div className="modal-info-caja" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-info-cabecera">
+            <div>
+              <h3 className="modal-info-nombre">{usuario.nombre} {usuario.apellidos}</h3>
+              <p className="modal-info-correo">{usuario.username}</p>
             </div>
+            <button className="modal-cerrar-btn" onClick={onCerrar}>✕</button>
           </div>
-          {matricula && matricula.length > 0 ? (
-            matricula.map((m, i) => (
-              <div className="info-grupos-grid" key={i}>
-                <div className="info-grupo info-pagos">
-                  <h4 className="info-grupo-titulo">Pagos</h4>
-                  <div className="info-campo"><span className="info-label">Psicotécnico</span><span className={`info-badge ${m.psicotecnico ? "badge-si" : "badge-no"}`}>{m.psicotecnico ? "Sí" : "No"}</span></div>
-                  <div className="info-campo"><span className="info-label">Pagó todo</span><span className={`info-badge ${m.pago ? "badge-si" : "badge-no"}`}>{m.pago ? "Sí" : "No"}</span></div>
-                  <div className="info-campo"><span className="info-label">Pago tasa DGT</span><span className={`info-badge ${m.tasaDgt ? "badge-si" : "badge-no"}`}>{m.tasaDgt ? "Sí" : "No"}</span></div>
-                </div>
-                <div className="info-grupo info-examenes">
-                  <h4 className="info-grupo-titulo">Fechas exámenes</h4>
-                  <div className="info-campo"><span className="info-label">Examen teórico</span><span className="info-valor">{m.fechaTeorico || "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Examen práctico</span><span className="info-valor">{m.fechaPractico || "—"}</span></div>
-                </div>
-                <div className="info-grupo info-profesor">
-                  <h4 className="info-grupo-titulo">Profesor</h4>
-                  <div className="info-campo"><span className="info-label">Nombre</span><span className="info-valor">{m.nombreProfesor || "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Apellidos</span><span className="info-valor">{m.apellidosProfesor || "—"}</span></div>
-                </div>
-                <div className="info-grupo info-paquete">
-                  <h4 className="info-grupo-titulo">Paquete</h4>
-                  <div className="info-campo"><span className="info-label">Tipo carnet</span><span className="info-valor">{m.tiposCarnet || "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Tipo paquete</span><span className="info-valor">{m.tipoPaquete || "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Gestiones</span><span className="info-valor">{m.cantidadGestion ?? "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Clases conducir</span><span className="info-valor">{m.clasesConducir ?? "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Clases especiales</span><span className="info-valor">{m.clasesEspeciales ?? "—"}</span></div>
-                </div>
-                <div className="info-grupo info-vehiculo">
-                  <h4 className="info-grupo-titulo">Vehículo</h4>
-                  <div className="info-campo"><span className="info-label">Nº Vehículo</span><span className="info-valor">{m.idVehiculo || "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Tipo vehículo</span><span className="info-valor">{m.tipoVehiculo || "—"}</span></div>
-                  <div className="info-campo"><span className="info-label">Remolque</span><span className={`info-badge ${m.remolque ? "badge-si" : "badge-no"}`}>{m.remolque ? "Sí" : "No"}</span></div>
-                </div>
+          <div className="modal-info-cuerpo">
+            <div className="info-grupo info-personal">
+              <h4 className="info-grupo-titulo">Datos personales</h4>
+              <div className="info-grid">
+                <div className="info-campo"><span className="info-label">DNI</span><span className="info-valor">{usuario.dni || "—"}</span></div>
+                <div className="info-campo"><span className="info-label">Fecha nacimiento</span><span className="info-valor">{usuario.fechaNacimiento || "—"}</span></div>
+                <div className="info-campo"><span className="info-label">Dirección</span><span className="info-valor">{usuario.direccion || "—"}</span></div>
+                <div className="info-campo"><span className="info-label">Fecha registro</span><span className="info-valor">{usuario.fechaRegistro || "—"}</span></div>
+                <div className="info-campo"><span className="info-label">Teléfono</span><span className="info-valor">{usuario.telefono || "—"}</span></div>
               </div>
-            ))
-          ) : (
-            <>
-              <p className="sin-matricula">Este usuario no tiene matrícula registrada. ¿Quiere registrar una nueva matricula?</p>
-              <button>Añadir matricula</button> {/*BOTON AÑADIR MATRICULAAA*/}
-            </>
-          )}
+            </div>
+            {matricula && matricula.length > 0 ? (
+              matricula.map((m, i) => (
+                <div className="info-grupos-grid" key={i}>
+                  <div className="info-grupo info-pagos">
+                    <h4 className="info-grupo-titulo">Pagos</h4>
+                    <div className="info-campo"><span className="info-label">Psicotécnico</span><span className={`info-badge ${m.psicotecnico ? "badge-si" : "badge-no"}`}>{m.psicotecnico ? "Sí" : "No"}</span></div>
+                    <div className="info-campo"><span className="info-label">Pagó todo</span><span className={`info-badge ${m.pago ? "badge-si" : "badge-no"}`}>{m.pago ? "Sí" : "No"}</span></div>
+                    <div className="info-campo"><span className="info-label">Pago tasa DGT</span><span className={`info-badge ${m.tasaDgt ? "badge-si" : "badge-no"}`}>{m.tasaDgt ? "Sí" : "No"}</span></div>
+                  </div>
+                  <div className="info-grupo info-examenes">
+                    <h4 className="info-grupo-titulo">Fechas exámenes</h4>
+                    <div className="info-campo"><span className="info-label">Examen teórico</span><span className="info-valor">{m.fechaTeorico || "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Examen práctico</span><span className="info-valor">{m.fechaPractico || "—"}</span></div>
+                  </div>
+                  <div className="info-grupo info-profesor">
+                    <h4 className="info-grupo-titulo">Profesor</h4>
+                    <div className="info-campo"><span className="info-label">Nombre</span><span className="info-valor">{m.nombreProfesor || "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Apellidos</span><span className="info-valor">{m.apellidosProfesor || "—"}</span></div>
+                  </div>
+                  <div className="info-grupo info-paquete">
+                    <h4 className="info-grupo-titulo">Paquete</h4>
+                    <div className="info-campo"><span className="info-label">Tipo carnet</span><span className="info-valor">{m.tiposCarnet || "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Tipo paquete</span><span className="info-valor">{m.tipoPaquete || "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Gestiones</span><span className="info-valor">{m.cantidadGestion ?? "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Clases conducir</span><span className="info-valor">{m.clasesConducir ?? "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Clases especiales</span><span className="info-valor">{m.clasesEspeciales ?? "—"}</span></div>
+                  </div>
+                  <div className="info-grupo info-vehiculo">
+                    <h4 className="info-grupo-titulo">Vehículo</h4>
+                    <div className="info-campo"><span className="info-label">Nº Vehículo</span><span className="info-valor">{m.idVehiculo || "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Tipo vehículo</span><span className="info-valor">{m.tipoVehiculo || "—"}</span></div>
+                    <div className="info-campo"><span className="info-label">Remolque</span><span className={`info-badge ${m.remolque ? "badge-si" : "badge-no"}`}>{m.remolque ? "Sí" : "No"}</span></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <p className="sin-matricula">Este usuario no tiene matrícula registrada. ¿Quiere registrar una nueva matricula?</p>
+                <button onClick={() => { setModalNuevaMatricula(true) }} >Añadir matricula</button> {/*BOTON AÑADIR MATRICULAAA*/}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      <ModalNuevaMatricula
+        visible={modalNuevaMatricula}
+        usuario={usuario.username}
+        onCerrar={() => setModalNuevaMatricula(false)}
+        mostrarAlerta={mostrarAlerta}
+      />
+    </>
   );
 }
 
@@ -431,7 +475,7 @@ function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
   const nombreRol = { 1: "Administrador", 2: "Profesor", 3: "Alumno", 4: "Cliente" };
 
   return (
-    <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir ${nombreRol[form.rol]}`}>
+    <Modal visible={visible} onCerrar={onCerrar} titulo={`Añadir ${nombreRol[form.idRol]}`}>
       <div className="modal-anadir-cuerpo">
         <div className="anadir-campo-full">
           <label className="campo-label">Rol</label>
@@ -495,7 +539,7 @@ function ModalAnadirUsuario({ visible, rolPorDefecto, onGuardar, onCerrar }) {
             />
           </div>
         </div>
-        <button className="btn-guardar-usuario" onClick={guardar}>Crear {nombreRol[form.rol]}</button>
+        <button className="btn-guardar-usuario" onClick={guardar}>Crear {nombreRol[form.idRol]}</button>
       </div>
     </Modal>
   );
@@ -530,7 +574,6 @@ function PanelLateral({ rolActivo, totalUsuarios, onAnadir }) {
     </aside>
   );
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 // TABLA ADMINISTRADORES
@@ -789,7 +832,6 @@ function TablaProfesores({ mostrarAlerta }) {
   );
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 // TABLA ALUMNOS
 
@@ -921,7 +963,7 @@ function TablaAlumnos({ mostrarAlerta }) {
       </div>
       <ModalEditarUsuario visible={modalEditar} usuario={usuarioSeleccionado} tipo="alumno" onGuardar={guardarEdicion} onCerrar={() => setModalEditar(false)} />
       <ModalConfirmarBorrado visible={modalBorrado} tipo="alumno" onConfirmar={confirmarBorrar} onCancelar={() => setModalBorrado(false)} />
-      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => setModalVer(false)} />
+      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => setModalVer(false)} mostrarAlerta={mostrarAlerta} />
     </>
   );
 }
@@ -1048,7 +1090,7 @@ function TablaClientes({ mostrarAlerta }) {
       </div>
       <ModalEditarUsuario visible={modalEditar} usuario={usuarioSeleccionado} tipo="cliente" onGuardar={guardarEdicion} onCerrar={() => setModalEditar(false)} />
       <ModalConfirmarBorrado visible={modalBorrado} tipo="cliente" onConfirmar={confirmarBorrar} onCancelar={() => setModalBorrado(false)} />
-      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => setModalVer(false)} />
+      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => setModalVer(false)} mostrarAlerta={mostrarAlerta} />
     </>
   );
 }
@@ -1140,7 +1182,7 @@ function DashboardAdmin() {
       if (res.ok) mostrarAlerta("¡Usuario creado correctamente!", "exito");
       else {
         // Leer el mensaje del backend
-        const data = await res.text(); 
+        const data = await res.text();
         mostrarAlerta(data || "Error al crear el usuario.", "error");
       }
     } catch (e) {
