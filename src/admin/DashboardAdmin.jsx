@@ -263,8 +263,8 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
     const headers = obtenerAuthHeaders();
     try {
       const res = await fetch('http://localhost:9002/matricula/alta-dto', { //<- lo ha escrito alvaro :D
-        method: "PUT",
-        headers:{ "Content-Type": "application/json"},
+        method: "POST",
+        headers,
         body: JSON.stringify(form),
       });
       if (res.ok) {
