@@ -26,7 +26,7 @@
 
 .promo-container {
   overflow: hidden;
-  whitespace: nowrap;
+  white-space: nowrap;
   width: 100%;
 }
 
@@ -1079,7 +1079,7 @@
 
 .pd-extra-class-row {
   background: #fffce2;
-  border: 3px solid #ddcc12;
+  border: 3px solid #099107;
   border-radius: 14px;
   padding: 16px 20px;
   margin-bottom: 17px;
