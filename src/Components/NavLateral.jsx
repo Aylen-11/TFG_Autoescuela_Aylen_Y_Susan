@@ -31,15 +31,14 @@ export function TopbarPerfil({ nombreUsuario, correoUsuario, rolEtiqueta, imagen
       className="topbar-perfil-usuario"
       onClick={() => inputImagenRef.current?.click()}
       title="Cambiar foto de perfil"
-    >
-      <div className="topbar-avatar-wrapper">
+    ><div className="topbar-avatar-wrapper">
+
         {imagenPerfil
           ? <img src={imagenPerfil} alt="perfil" className="topbar-avatar-img" />
-          : <div className="topbar-avatar-placeholder">{nombreUsuario?.charAt(0)?.toUpperCase() || "A"}</div>
+          : <img src="/imagenes/sinfoto.jpg" alt="perfil" className="topbar-avatar-img" />
         }
         <div className="topbar-avatar-overlay"><span></span></div>
       </div>
-
 
       <div className="topbar-perfil-info" style={{ alignItems: "flex-start" }}>
         <span className="topbar-perfil-nombre">{nombreUsuario}</span>

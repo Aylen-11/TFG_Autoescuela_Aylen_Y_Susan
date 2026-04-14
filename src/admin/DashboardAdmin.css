@@ -38,6 +38,13 @@
   filter: brightness(0) invert(0);
 }
 
+.tarjeta-icono-img:hover {
+  width: 33px;
+  height: 33px;
+  filter: brightness(1) invert(1);
+
+}
+
 .sidebar-lateral {
   width: 260px;
   min-width: 260px;
@@ -311,16 +318,15 @@
 }
 
 .topbar-perfil-correo {
-  font-size: 12px;
-  font-weight: 500;
-  color: #303132;
+  font-size: 14px;
+  font-weight: 800; 
+  color: #0a3158;
   letter-spacing: 0.3px;
 }
 
 .barra-busqueda-wrapper {
-  width: 320px;
+  width: 340px;
 }
-
 
 
 .dashboard-topbar {
@@ -444,7 +450,7 @@
 
 .barra-busqueda-wrapper {
   position: relative;
-  width: 350px;
+  width: 390px;
 }
 
 .barra-busqueda-input-zona {
@@ -453,7 +459,7 @@
   border-radius: 10px;
   overflow: hidden;
   background: #ffffff;
-  border: 1px solid #525355;
+  border: 1px solid #37383b;
   padding: 0px;
   gap: 0;
 }
@@ -464,7 +470,7 @@
   justify-content: center;
   background: #ffffff;
   padding: 0 12px;
-  border-right: 1px solid #818286;
+  border-right: 1px solid #444548;
   border-radius: 8px 0 0 8px;
   flex-shrink: 0;
 }
@@ -611,9 +617,9 @@
 }
 
 .topbar-perfil-nombre {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 900;
-  color: #313233;
+  color: #0c4f92;
   letter-spacing: 1px;
   white-space: nowrap;
 }
@@ -709,7 +715,11 @@
 
 .tarjeta-estadistica {
   background: #ffffff;
-  border: 2px solid #bebaba;
+  border: 2px solid #b6b2b2;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  height: 100px;
   border-radius: 14px;
   padding: 20px 18px;
   display: flex;
@@ -725,14 +735,30 @@
 
 .tarjeta-estadistica:hover {
   background-color: white;
-  border-color: #656667;
-  box-shadow: 0 6px 20px rgba(1, 42, 94, 0.1);
-  transform: translateY(-2px);
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  transition: none;
+
 }
+
+
+.tarjeta-estadistica--activa .tarjeta-icono-zona {
+  background: var(--tarjeta-color);
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+   rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.621) 0px -3px 0px inset;
+
+}
+
+.tarjeta-estadistica--activa .tarjeta-icono-img {
+  filter: brightness(0) invert(1);
+}
+
 
 .tarjeta-estadistica--activa {
   border-color: var(--tarjeta-color);
-  box-shadow: 0 6px 20px rgba(1, 42, 94, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.292);
 }
 
 .tarjeta-estadistica--activa .tarjeta-barra-activa {
@@ -744,15 +770,15 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 5px;
+  height: 6px;
   background: var(--tarjeta-color);
   opacity: 0;
   transition: opacity 0.2s;
 }
 
 .tarjeta-icono-zona {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 12px;
   background: color-mix(in srgb, var(--tarjeta-color) 12%, transparent);
   display: flex;
@@ -761,8 +787,12 @@
   flex-shrink: 0;
 }
 
-.tarjeta-icono {
-  font-size: 2px;
+.tarjeta-estadistica:hover .tarjeta-icono-zona {
+  background: var(--tarjeta-color);
+}
+
+.tarjeta-estadistica:hover .tarjeta-icono-img {
+  filter: brightness(0) invert(1);
 }
 
 .tarjeta-datos {
@@ -1547,7 +1577,7 @@
 .info-vehiculo {
   background: #ccf6fd;
   border-left-color: #0eace1;
-  
+
 }
 
 .info-grupo-titulo {
@@ -1559,7 +1589,7 @@
   margin-bottom: 10px;
 }
 
-.info-matricula-titulo{
+.info-matricula-titulo {
   font-size: 14px;
   font-weight: 900;
   color: #000000;
@@ -1608,7 +1638,7 @@
 .badge-si {
   background: #b5fdb4;
   color: #036c2a;
-  
+
 }
 
 .badge-no {
