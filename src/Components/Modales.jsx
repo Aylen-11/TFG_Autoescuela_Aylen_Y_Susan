@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use, Fragment } from "react";
 import { Modal } from "./SharedUI";
 import { SelectorRolNumerico } from "./SelectorRolNumerico";
 import { obtenerAuthHeaders } from "../utils/auth";
@@ -380,6 +380,35 @@ export function ModalAnadirMatricula({ visible, onGuardar, onCerrar, usuario }) 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA AÑADIR UN NUEVA MATRICULA(ALUMNO Y CLIENTE)
 function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAlerta }) {
+  //DROPDOWNS CON TODA LA INFORMACION DE ALUMNO, TIPO CARNET, ID VEHICULO Y TIPO PAQUETE
+  const [profesores, setProfesores] = useState([]);
+  const [carnets, setCarnets] = useState([]);
+  const [vehiculos, setVehiculos] = useState([]);
+  const [tipoPaquetes, setTipoPaquetes] = useState([]);
+
+  useEffect(() => {
+    const headers = obtenerAuthHeaders();
+    if (!headers) return;
+    const cargaDropdowns = async () => {
+      try {
+        const [resProfesores, resCarnets, resVehiculos, resPaquetes] = await Promise.all([
+          fetch("http://localhost:9002/usuarios/rol/2", { method: "GET", headers }),
+          fetch("http://localhost:9002/carnet/todos", { method: "GET", headers }),
+          fetch("http://localhost:9002/vehiculo/todos", { method: "GET", headers }),
+          fetch("http://localhost:9002/paquete/todos", { method: "GET", headers }),
+        ]);
+        if (resProfesores.ok) setProfesores(await resProfesores.json());
+        if (resCarnets.ok) setCarnets(await resCarnets.json());
+        if (resVehiculos.ok) setVehiculos(await resVehiculos.json());
+        if (resPaquetes.ok) setTipoPaquetes(await resPaquetes.json());
+      } catch (e) {
+        console.log("Error al cargar datos para dropdowns", e);
+      }
+    };
+    cargaDropdowns();
+  }, [visible]);
+
+
   const [form, setForm] = useState({
     psicotecnico: false,
     pago: false,
@@ -434,10 +463,12 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
             { campo: "psicotecnico", label: "¿Tiene el psicotécnico?", tipo: "boolean" },
             { campo: "pago", label: "¿Tiene todo pagado ya?", tipo: "boolean" },
             { campo: "tasaDgt", label: "¿Tiene pagada la tasa de la DGT?", tipo: "boolean" },
-            { campo: "usernameProfesor", label: "Profesor asignado", tipo: "text" },
-            { campo: "tiposCarnet", label: "Tipo de carnet", tipo: "text" },
-            { campo: "idVehiculo", label: "Número de vehículo asignado", tipo: "text" },
-            { campo: "tipoPaquete", label: "Tipo de paquete", tipo: "text" },
+
+            { campo: "usernameProfesor", label: "Profesor asignado", tipo: "profesor" },
+            { campo: "tiposCarnet", label: "Tipo de carnet", tipo: "carnet" },
+            { campo: "idVehiculo", label: "Número de vehículo asignado", tipo: "vehiculo" },
+            { campo: "tipoPaquete", label: "Tipo de paquete", tipo: "paquete" },
+
             { campo: "fechaTeorico", label: "Fecha examen teórico", tipo: "date" },
             { campo: "fechaPractico", label: "Fecha examen práctico", tipo: "date" },
           ].map(({ campo, label, tipo }) => (
@@ -451,7 +482,59 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
                 >
                   {form[campo] ? "Sí" : "No"}
                 </button>
-              ) : (
+              ) : tipo === "profesor" ? (
+                <select
+                  className="campo-input"
+                  value={form[campo]}
+                  onChange={(e) => cambiar(campo, e.target.value)}
+                >
+                  <option value="">Selecciona un profesor</option>
+                  {profesores.map((p) => (
+                    <option key={p.idUser} value={p.username}>
+                      {p.nombre} {p.apellidos} ({p.username})
+                    </option>
+                  ))}
+                </select>
+              ) : tipo === "carnet" ? (
+                <select
+                  className="campo-input"
+                  value={form[campo]}
+                  onChange={(e) => cambiar(campo, e.target.value)}
+                >
+                  <option value="">Selecciona un tipo de carnet</option>
+                  {carnets.map((c) => (
+                    <option key={c.idCarnet} value={c.tipo}>
+                      {c.tipos}
+                    </option>
+                  ))}
+                </select>
+              ) : tipo === "vehiculo" ? (
+                <select
+                  className="campo-input"
+                  value={form[campo]}
+                  onChange={(e) => cambiar(campo, e.target.value)}
+                >
+                  <option value="">Selecciona un vehículo</option>
+                  {vehiculos.map((v) => (
+                    <option key={v.idVehiculo} value={v.idVehiculo}>
+                      {v.idVehiculo} - {v.marca}- {v.modelo} - {v.tipo} {v.remolque ? "(con remolque)" : ""}
+                    </option>
+                  ))}
+                </select>
+              ) : tipo === "paquete" ? (
+                <select
+                  className="campo-input"
+                  value={form[campo]}
+                  onChange={(e) => cambiar(campo, e.target.value)}
+                >
+                  <option value="">Selecciona un tipo de paquete</option>
+                  {tipoPaquetes.map((p) => (
+                    <option key={p.idPaquete} value={p.tipoPaquete}>
+                      {p.tipo}
+                    </option>
+                  ))}
+                </select>
+                ) : (
                 <input
                   className="campo-input"
                   type={tipo}
@@ -459,7 +542,7 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
                   onChange={(e) => cambiar(campo, e.target.value)}
                   placeholder={label}
                 />
-              )}
+                )}
             </div>
           ))}
 
@@ -484,7 +567,7 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //MODAL PARA VER INFORMACIÓN COMPLETA DE UN USUARIO (SOLO EN ALUMNOS Y CLIENTES)
- export function ModalVerInfo({ visible, usuario, onCerrar, mostrarAlerta }) {
+export function ModalVerInfo({ visible, usuario, onCerrar, mostrarAlerta }) {
   const [modalNuevaMatricula, setModalNuevaMatricula] = useState(false);
   const [matricula, setMatricula] = useState([]);
 
@@ -501,7 +584,6 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
   useEffect(() => {
     if (visible && usuario) cargarMatriculaAlumno();
   }, [visible, usuario]);
-
 
   if (!visible || !usuario) return null;
 
@@ -527,45 +609,59 @@ function ModalNuevaMatricula({ visible, onGuardar, onCerrar, usuario, mostrarAle
                 <div className="info-campo"><span className="info-label">Teléfono</span><span className="info-valor">{usuario.telefono || "—"}</span></div>
               </div>
             </div>
+            {matricula.length > 1 &&
+              <>
+                <hr className="info-separador" />
+                <h4 className="info-matricula-titulo">Matriculas registradas</h4>
+              </>
+            }
             {matricula && matricula.length > 0 ? (
               matricula.map((m, i) => (
-                <div className="info-grupos-grid" key={i}>
-                  <div className="info-grupo info-pagos">
-                    <h4 className="info-grupo-titulo">Pagos</h4>
-                    <div className="info-campo"><span className="info-label">Psicotécnico</span><span className={`info-badge ${m.psicotecnico ? "badge-si" : "badge-no"}`}>{m.psicotecnico ? "Sí" : "No"}</span></div>
-                    <div className="info-campo"><span className="info-label">Pagó todo</span><span className={`info-badge ${m.pago ? "badge-si" : "badge-no"}`}>{m.pago ? "Sí" : "No"}</span></div>
-                    <div className="info-campo"><span className="info-label">Pago tasa DGT</span><span className={`info-badge ${m.tasaDgt ? "badge-si" : "badge-no"}`}>{m.tasaDgt ? "Sí" : "No"}</span></div>
+                <Fragment key={i}>
+                  <div className="info-grupos-grid">
+                    <div className="info-grupo info-pagos">
+                      <h4 className="info-grupo-titulo">Pagos</h4>
+                      <div className="info-campo"><span className="info-label">Psicotécnico</span><span className={`info-badge ${m.psicotecnico ? "badge-si" : "badge-no"}`}>{m.psicotecnico ? "Sí" : "No"}</span></div>
+                      <div className="info-campo"><span className="info-label">Pagó todo</span><span className={`info-badge ${m.pago ? "badge-si" : "badge-no"}`}>{m.pago ? "Sí" : "No"}</span></div>
+                      <div className="info-campo"><span className="info-label">Pago tasa DGT</span><span className={`info-badge ${m.tasaDgt ? "badge-si" : "badge-no"}`}>{m.tasaDgt ? "Sí" : "No"}</span></div>
+                    </div>
+                    <div className="info-grupo info-examenes">
+                      <h4 className="info-grupo-titulo">Fechas exámenes</h4>
+                      <div className="info-campo"><span className="info-label">Examen teórico</span><span className="info-valor">{m.fechaTeorico || "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Examen práctico</span><span className="info-valor">{m.fechaPractico || "—"}</span></div>
+                    </div>
+                    <div className="info-grupo info-profesor">
+                      <h4 className="info-grupo-titulo">Profesor</h4>
+                      <div className="info-campo"><span className="info-label">Nombre</span><span className="info-valor">{m.nombreProfesor || "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Apellidos</span><span className="info-valor">{m.apellidosProfesor || "—"}</span></div>
+                    </div>
+                    <div className="info-grupo info-paquete">
+                      <h4 className="info-grupo-titulo">Paquete</h4>
+                      <div className="info-campo"><span className="info-label">Tipo carnet</span><span className="info-valor">{m.tiposCarnet || "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Tipo paquete</span><span className="info-valor">{m.tipoPaquete || "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Gestiones</span><span className="info-valor">{m.cantidadGestion ?? "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Clases conducir</span><span className="info-valor">{m.clasesConducir ?? "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Clases especiales</span><span className="info-valor">{m.clasesEspeciales ?? "—"}</span></div>
+                    </div>
+                    <div className="info-grupo info-vehiculo">
+                      <h4 className="info-grupo-titulo">Vehículo</h4>
+                      <div className="info-campo"><span className="info-label">Nº Vehículo</span><span className="info-valor">{m.idVehiculo || "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Tipo vehículo</span><span className="info-valor">{m.tipoVehiculo || "—"}</span></div>
+                      <div className="info-campo"><span className="info-label">Remolque</span><span className={`info-badge ${m.remolque ? "badge-si" : "badge-no"}`}>{m.remolque ? "Sí" : "No"}</span></div>
+                    </div>
                   </div>
-                  <div className="info-grupo info-examenes">
-                    <h4 className="info-grupo-titulo">Fechas exámenes</h4>
-                    <div className="info-campo"><span className="info-label">Examen teórico</span><span className="info-valor">{m.fechaTeorico || "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Examen práctico</span><span className="info-valor">{m.fechaPractico || "—"}</span></div>
-                  </div>
-                  <div className="info-grupo info-profesor">
-                    <h4 className="info-grupo-titulo">Profesor</h4>
-                    <div className="info-campo"><span className="info-label">Nombre</span><span className="info-valor">{m.nombreProfesor || "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Apellidos</span><span className="info-valor">{m.apellidosProfesor || "—"}</span></div>
-                  </div>
-                  <div className="info-grupo info-paquete">
-                    <h4 className="info-grupo-titulo">Paquete</h4>
-                    <div className="info-campo"><span className="info-label">Tipo carnet</span><span className="info-valor">{m.tiposCarnet || "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Tipo paquete</span><span className="info-valor">{m.tipoPaquete || "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Gestiones</span><span className="info-valor">{m.cantidadGestion ?? "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Clases conducir</span><span className="info-valor">{m.clasesConducir ?? "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Clases especiales</span><span className="info-valor">{m.clasesEspeciales ?? "—"}</span></div>
-                  </div>
-                  <div className="info-grupo info-vehiculo">
-                    <h4 className="info-grupo-titulo">Vehículo</h4>
-                    <div className="info-campo"><span className="info-label">Nº Vehículo</span><span className="info-valor">{m.idVehiculo || "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Tipo vehículo</span><span className="info-valor">{m.tipoVehiculo || "—"}</span></div>
-                    <div className="info-campo"><span className="info-label">Remolque</span><span className={`info-badge ${m.remolque ? "badge-si" : "badge-no"}`}>{m.remolque ? "Sí" : "No"}</span></div>
-                  </div>
-                </div>
+                  {matricula.length > 1 && <hr className="info-separador" />}
+                  {i === matricula.length - 1 && (
+                    <div className="modal-matricula-footer">
+                      <button className="btn-guardar-usuario" onClick={() => setModalNuevaMatricula(true)} >Añadir matrícula</button>
+                    </div>
+                  )}
+                </Fragment>
               ))
             ) : (
               <>
                 <p className="sin-matricula">Este usuario no tiene matrícula registrada. ¿Quiere registrar una nueva matricula?</p>
-                <button onClick={() => { setModalNuevaMatricula(true) }} >Añadir matricula</button> {/*BOTON AÑADIR MATRICULAAA*/}
+                <button onClick={() => setModalNuevaMatricula(true)}>Añadir matricula</button>
               </>
             )}
           </div>

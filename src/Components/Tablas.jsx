@@ -373,7 +373,7 @@ export function TablaAlumnos({ mostrarAlerta, consulta = "" }) {
 
       <ModalEditarUsuario visible={modalEditar} usuario={usuarioSeleccionado} tipo="alumno" onGuardar={guardarEdicion} onCerrar={() => setModalEditar(false)} />
       <ModalConfirmarBorrado visible={modalBorrado} tipo="alumno" onConfirmar={confirmarBorrar} onCancelar={() => setModalBorrado(false)} />
-      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => { setModalVer(false); setUsuarioSeleccionado(null); }} />
+      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => { setModalVer(false); setUsuarioSeleccionado(null); }} mostrarAlerta={mostrarAlerta}/>
       <ModalAnadirUsuario visible={modalAnadir} rolPorDefecto="3" onGuardar={guardarNuevo} onCerrar={() => setModalAnadir(false)} />
     </>
   );
@@ -484,7 +484,7 @@ export function TablaClientes({ mostrarAlerta, consulta = "" }) {
 
       <ModalEditarUsuario visible={modalEditar} usuario={usuarioSeleccionado} tipo="cliente" onGuardar={guardarEdicion} onCerrar={() => setModalEditar(false)} />
       <ModalConfirmarBorrado visible={modalBorrado} tipo="cliente" onConfirmar={confirmarBorrar} onCancelar={() => setModalBorrado(false)} />
-      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => { setModalVer(false); setUsuarioSeleccionado(null); }} />
+      <ModalVerInfo visible={modalVer} usuario={usuarioSeleccionado} onCerrar={() => { setModalVer(false); setUsuarioSeleccionado(null); }} mostrarAlerta={mostrarAlerta} />
       <ModalAnadirUsuario visible={modalAnadir} rolPorDefecto="4" onGuardar={guardarNuevo} onCerrar={() => setModalAnadir(false)} />
     </>
   );

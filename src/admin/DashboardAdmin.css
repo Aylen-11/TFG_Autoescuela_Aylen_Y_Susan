@@ -1559,6 +1559,18 @@
   margin-bottom: 10px;
 }
 
+.info-matricula-titulo{
+  font-size: 14px;
+  font-weight: 900;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

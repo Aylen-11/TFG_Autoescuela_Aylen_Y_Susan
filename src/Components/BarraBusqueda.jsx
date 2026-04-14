@@ -4,8 +4,9 @@ export function BarraBusqueda({ onConsultaCambio }) {
   const [consulta, setConsulta] = useState("");
 
   const manejarCambio = (e) => {
-    setConsulta(e.target.value);
-    onConsultaCambio(e.target.value);
+    let texto = e.target.value; 
+    setConsulta(texto);
+    onConsultaCambio(texto);
   };
 
   return (

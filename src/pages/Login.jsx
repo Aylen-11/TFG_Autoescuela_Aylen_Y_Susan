@@ -38,7 +38,7 @@ function Login() {
       });
 
       if (envioRespuesta.ok) {
-        window.alert("Registro exitoso, ya puedes iniciar sesión");
+        //window.alert("Registro exitoso, ya puedes iniciar sesión");
         try {
           const buscarIdPorEmail = await fetch(`http://localhost:9002/usuarios/buscarrol/${registro.username}`, {
             method: "GET",
@@ -101,7 +101,7 @@ function Login() {
       });
 
       if (envioRespuesta.ok) {
-        window.alert("Login exitoso");
+        //window.alert("Login exitoso");
         try {
           const buscarIdPorEmail = await fetch(`http://localhost:9002/usuarios/buscarrol/${login.username}`, {
             method: "GET",
