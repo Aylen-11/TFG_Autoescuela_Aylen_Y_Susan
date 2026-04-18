@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../admin/DashboardAdmin.css";
 import "./DashboardProfesor.css"; 
+import { obtenerAuthHeaders, obtenerUsername } from "../utils/auth";
 
 
 function formatDate(str) {
@@ -9,8 +10,9 @@ function formatDate(str) {
   const [y, m, d] = str.split("-");
   return `${d}/${m}/${y}`;
 }
-export function TopbarPerfil({ nombreUsuario, correoUsuario, imagenPerfil, onImagenCambio }) {
+export function TopbarPerfil({imagenPerfil, onImagenCambio, nombreCompleto, username }) {
   const inputRef = useRef(null);
+
   return (
     <div
       className="topbar-perfil-usuario"
@@ -25,8 +27,8 @@ export function TopbarPerfil({ nombreUsuario, correoUsuario, imagenPerfil, onIma
         <div className="topbar-avatar-overlay"><span></span></div>
       </div>
       <div className="topbar-perfil-info" style={{ alignItems: "flex-start" }}>
-        <span className="topbar-perfil-nombre">{nombreUsuario}</span>
-        <span className="topbar-perfil-correo">{correoUsuario}</span>
+        <span className="topbar-perfil-nombre">{nombreCompleto}</span>
+        <span className="topbar-perfil-correo">{username}</span>
       </div>
       <input
         ref={inputRef}
@@ -128,7 +130,23 @@ function TarjetaAlumnosProfesor({ total }) {
 }
 
 //alumnos del profeso--------------------------------------------------------------------------------------------------------
-function TablaAlumnosProfesor({ alumnos = [], consulta = "" }) {
+function TablaAlumnosProfesor({ consulta = ""}) {
+  //datos alumnos
+  const [alumnos, setAlumnos] = useState([]);
+   const username = obtenerUsername();
+
+  //carga de alumnos filtrados por el profesor 
+  const cargar = async () => {
+      const headers = obtenerAuthHeaders();
+      if (!headers) return;
+      try {
+        const res = await fetch(`http://localhost:9002/matricula/alumnos-de-profesor/${username}`, { method: "GET", headers });
+        if (res.ok) setAlumnos(await res.json());
+      } catch (e) { console.log("Error en fetch alumnos", e); }
+    };
+
+    useEffect(() => { cargar(); }, []);   
+
   const filtrados = alumnos.filter((a) => {
     const texto = `${a.nombre ?? ""} ${a.apellidos ?? ""}`.toLowerCase();
     return texto.includes(consulta.toLowerCase());
@@ -160,10 +178,10 @@ function TablaAlumnosProfesor({ alumnos = [], consulta = "" }) {
               </tr>
             ) : (
               filtrados.map((a, i) => (
-                <tr key={a.idUser ?? i} className="tabla-fila">
-                  <td>{a.nombre}</td>
-                  <td>{a.apellidos}</td>
-                  <td>{a.username}</td>
+                <tr key={i} className="tabla-fila">
+                  <td>{a.nombreAlumno}</td>
+                  <td>{a.apellidosAlumno}</td>
+                  <td>{a.usernameAlumno}</td>
                   <td>
                     <span className="prof-fecha-badge prof-fecha-badge--teorico">
                       {formatDate(a.fechaTeorico)}
@@ -185,7 +203,21 @@ function TablaAlumnosProfesor({ alumnos = [], consulta = "" }) {
 }
 
 // calendario----------------------------------------------------------------------------------------------------------
-function Calendario({ alumnos = [], consulta = "" }) {
+function Calendario({ consulta = "" }) {
+  const [alumnos, setAlumnos] = useState([]);
+    const username = obtenerUsername();
+
+    const cargar = async () => {
+      const headers = obtenerAuthHeaders();
+      if (!headers) return;
+      try {
+        const res = await fetch(`http://localhost:9002/matricula/alumnos-de-profesor/${username}`, { method: "GET", headers });
+        if (res.ok) setAlumnos(await res.json());
+      } catch (e) { console.log("Error en fetch alumnos", e); }
+    };
+
+    useEffect(() => { cargar(); }, []);   
+
   const hoy = new Date();
   const [mes, setMes] = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
@@ -199,7 +231,7 @@ function Calendario({ alumnos = [], consulta = "" }) {
   const offsetInicio = (primerDia.getDay() + 6) % 7;
   const eventosPorDia = {};
   alumnos.forEach((a) => {
-    const nombre = `${a.nombre} ${a.apellidos}`;
+    const nombre = `${a.nombreAlumno} ${a.apellidosAlumno}`;
     if (a.fechaTeorico) {
       if (!eventosPorDia[a.fechaTeorico]) eventosPorDia[a.fechaTeorico] = [];
       eventosPorDia[a.fechaTeorico].push({ tipo: "teorico", nombre });
@@ -324,8 +356,6 @@ function AlertaFlotante({ mensaje, tipo, visible }) {
 }
 
 function DashboardProfesor() {
-  const username = "prof.carlos@mail.com";
-  const nombreProfesor = "Carlos Sánchez";
 
   // aqui deje los estados vacios por si los ocupas si no los cambias 
   const [alumnos, setAlumnos] = useState([]);
@@ -333,7 +363,20 @@ function DashboardProfesor() {
   const [imagenPerfil, setImagenPerfil] = useState(null);
   const [alerta, setAlerta] = useState({ visible: false, mensaje: "", tipo: "exito" });
 
+  const username = obtenerUsername();
+  const [nombreCompleto, setNombreCompleto] = useState("");
 
+  useEffect(() => {
+    const cargar = async () => {
+      const headers = obtenerAuthHeaders();
+      if (!headers) return;
+      try {
+        const res = await fetch(`http://localhost:9002/usuarios/nombre/${username}`, { method: "GET", headers });
+        if (res.ok) setNombreCompleto(await res.text());
+      } catch (e) { console.log("Error fetch nombre", e); }
+    };
+    cargar();
+  }, []);
 
   const mostrarAlerta = (mensaje, tipo = "exito") => {
     setAlerta({ visible: true, mensaje, tipo });
@@ -356,15 +399,15 @@ function DashboardProfesor() {
          className="dashboard-topbar">
           <div>
             <p className="topbar-saludo-texto">
-              Bienvenido, <span className=  "topbar-saludo-nombre">{nombreProfesor}</span>
+              Bienvenido, <span className=  "topbar-saludo-nombre">{nombreCompleto}</span>
             </p>
             <p className="topbar-saludo-sub"> {fechaHoy}</p>
           </div>
           <div className="topbar-acciones">
             <BarraBusqueda onConsultaCambio=  {setConsulta} />
             <TopbarPerfil
-              nombreUsuario={nombreProfesor}
-              correoUsuario= {username}
+              nombreCompleto={nombreCompleto}
+              username={username}
               imagenPerfil={imagenPerfil}
               onImagenCambio=   {setImagenPerfil}
             />
