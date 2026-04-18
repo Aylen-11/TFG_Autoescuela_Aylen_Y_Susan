@@ -1,27 +1,53 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 
-const roles = [
+const menu = [
   {
-    key: "administradores",
-    label: "Administradores",
-    icono: "/imagenes/admin.png"
+    titulo: "PRINCIPAL",
+    items: [
+      {
+        key: "dashboard",
+        label: "Dashboard",
+        icono: "/imagenes/dasboard.png"
+      }
+    ]
   },
   {
-    key: "profesores",
-    label: "Profesores",
-    icono: "/imagenes/profesor.png"
+    titulo: "GESTIÓN DE USUARIOS",
+    items: [
+      {
+        key: "administradores",
+        label: "Administradores",
+        icono: "/imagenes/admin.png"
+      },
+      {
+        key: "profesores",
+        label: "Profesores",
+        icono: "/imagenes/profesor.png"
+      },
+      {
+        key: "alumnos",
+        label: "Alumnos",
+        icono: "/imagenes/alumno.png"
+      },
+      {
+        key: "clientes",
+        label: "Clientes",
+        icono: "/imagenes/cliente.png"
+      }
+    ]
   },
   {
-    key: "alumnos",
-    label: "Alumnos",
-    icono: "/imagenes/alumno.png"
-  },
-  {
-    key: "clientes",
-    label: "Clientes", icono: "/imagenes/cliente.png"
-  },
-];
+    titulo: "CUENTA",
+    items: [
+      {
+        key: "mis-datos",
+        label: "Mis datos",
+        icono: "/imagenes/perfil.png"
+      }
+    ]
+  }
+];;
 
 export function TopbarPerfil({ nombreUsuario, correoUsuario, rolEtiqueta, imagenPerfil, onImagenCambio }) {
   const inputImagenRef = useRef(null);
@@ -75,21 +101,35 @@ export function NavLateral({ rolActivo, setRolActivo, totalPorRol }) {
         </div>
       </div>
 
-      <nav className="sidebar-nav">
-        <p className="sidebar-nav-seccion-titulo">GESTIÓN DE PERFILES</p>
-        {roles.map(({ key, label, icono }) => (
-          <button
-            key={key}
-            className={`sidebar-nav-item ${rolActivo === key ? "sidebar-nav-item--activo" : ""}`}
-            onClick={() => setRolActivo(key)}
-          >
-            <span className="sidebar-nav-icono">
-              <img src={icono} alt={label} className="sidebar-icon-img" />
-            </span>
-            <span className="sidebar-nav-label">{label}</span>
-          </button>
-        ))}
-      </nav>
+   <nav className="sidebar-nav">
+
+  {menu.map((seccion) => (
+    <div key={seccion.titulo}>
+
+      {/* TÍTULO */}
+      <p className="sidebar-nav-seccion-titulo">
+        {seccion.titulo}
+      </p>
+
+      {/* BOTONES */}
+      {seccion.items.map(({ key, label, icono }) => (
+        <button
+          key={key}
+          className={`sidebar-nav-item ${rolActivo === key ? "sidebar-nav-item--activo" : ""}`}
+          onClick={() => setRolActivo(key)}
+        >
+          <span className="sidebar-nav-icono">
+            <img src={icono} alt={label} className="sidebar-icon-img" />
+          </span>
+
+          <span className="sidebar-nav-label">{label}</span>
+        </button>
+      ))}
+
+    </div>
+  ))}
+
+</nav>
 
       <div className="sidebar-footer">
         <Link to="/" className="sidebar-cerrar-sesion">
