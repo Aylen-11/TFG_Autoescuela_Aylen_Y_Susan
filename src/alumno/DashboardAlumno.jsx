@@ -41,7 +41,7 @@ function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }
   );
 }
 
-// modal con los datos personales del alumno
+// modal con los datos personales del alumnoo
 function ModalUsuario({ visible, usuario, onCerrar }) {
   if (!visible || !usuario) return null;
   return (
@@ -240,7 +240,7 @@ function TarjetaProfesor({ profesor }) {
 
 function formatFecha(str) {
   if (!str) return "---";                          // si no hay fecha no devuelve nada osea ---
-  const [y, m, d] = str.split("---");            
+  const [y, m, d] = str.split("");            
   const fecha = new Date(y, m - 1, d);          
   return fecha.toLocaleDateString("es-ES", {
     weekday: "long", day: "numeric",
