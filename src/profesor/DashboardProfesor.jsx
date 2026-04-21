@@ -128,27 +128,10 @@ function TarjetaAlumnosProfesor({ total }) {
     </div>
   );
 }
-
-//alumnos del profeso--------------------------------------------------------------------------------------------------------
-function TablaAlumnosProfesor({ consulta = ""}) {
-  //datos alumnos
-  const [alumnos, setAlumnos] = useState([]);
-   const username = obtenerUsername();
-
-  //carga de alumnos filtrados por el profesor 
-  const cargar = async () => {
-      const headers = obtenerAuthHeaders();
-      if (!headers) return;
-      try {
-        const res = await fetch(`http://localhost:9002/matricula/alumnos-de-profesor/${username}`, { method: "GET", headers });
-        if (res.ok) setAlumnos(await res.json());
-      } catch (e) { console.log("Error en fetch alumnos", e); }
-    };
-
-    useEffect(() => { cargar(); }, []);   
+function TablaAlumnosProfesor({ alumnos = [], consulta = "" }) {
 
   const filtrados = alumnos.filter((a) => {
-    const texto = `${a.nombre ?? ""} ${a.apellidos ?? ""}`.toLowerCase();
+    const texto = `${a.nombreAlumno ?? ""} ${a.apellidosAlumno ?? ""}`.toLowerCase();
     return texto.includes(consulta.toLowerCase());
   });
 
@@ -202,22 +185,7 @@ function TablaAlumnosProfesor({ consulta = ""}) {
   );
 }
 
-// calendario----------------------------------------------------------------------------------------------------------
-function Calendario({ consulta = "" }) {
-  const [alumnos, setAlumnos] = useState([]);
-    const username = obtenerUsername();
-
-    const cargar = async () => {
-      const headers = obtenerAuthHeaders();
-      if (!headers) return;
-      try {
-        const res = await fetch(`http://localhost:9002/matricula/alumnos-de-profesor/${username}`, { method: "GET", headers });
-        if (res.ok) setAlumnos(await res.json());
-      } catch (e) { console.log("Error en fetch alumnos", e); }
-    };
-
-    useEffect(() => { cargar(); }, []);   
-
+function Calendario({ alumnos = [], consulta = "" }) {
   const hoy = new Date();
   const [mes, setMes] = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
@@ -246,7 +214,6 @@ function Calendario({ consulta = "" }) {
   for (let i = 0; i < offsetInicio; i++) celdas.push(null);
   for (let d = 1; d <= ultimoDia.getDate(); d++) celdas.push(d);
 
-  //  convierte un numero de dia al formato YYYY-MM-DD para buscar en eventosPordia
   const toKey = (d) => {
     const mm = String(mes + 1).padStart(2, "0");
     const dd = String(d).padStart(2, "0");
@@ -357,7 +324,6 @@ function AlertaFlotante({ mensaje, tipo, visible }) {
 
 function DashboardProfesor() {
 
-  // aqui deje los estados vacios por si los ocupas si no los cambias 
   const [alumnos, setAlumnos] = useState([]);
   const [consulta, setConsulta] = useState("");
   const [imagenPerfil, setImagenPerfil] = useState(null);
@@ -365,6 +331,7 @@ function DashboardProfesor() {
 
   const username = obtenerUsername();
   const [nombreCompleto, setNombreCompleto] = useState("");
+
 
   useEffect(() => {
     const cargar = async () => {
@@ -374,6 +341,18 @@ function DashboardProfesor() {
         const res = await fetch(`http://localhost:9002/usuarios/nombre/${username}`, { method: "GET", headers });
         if (res.ok) setNombreCompleto(await res.text());
       } catch (e) { console.log("Error fetch nombre", e); }
+    };
+    cargar();
+  }, []);
+
+  useEffect(() => {
+    const cargar = async () => {
+      const headers = obtenerAuthHeaders();
+      if (!headers) return;
+      try {
+        const res = await fetch(`http://localhost:9002/matricula/alumnos-de-profesor/${username}`, { method: "GET", headers });
+        if (res.ok) setAlumnos(await res.json());
+      } catch (e) { console.log("Error fetch alumnos", e); }
     };
     cargar();
   }, []);
