@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import "../admin/DashboardAdmin.css";   
-import "./DashboardAlumno.css";    
+import "../admin/DashboardAdmin.css";
+import "./DashboardAlumno.css";
 import CalendarioExamenes from "../Components/CalendarioExamenes";
 import { obtenerAuthHeaders, obtenerUsername } from "../utils/auth"
+import { m } from "motion/react";
 
 // componente del perfil del usuario con su fotito de perfil 
 function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }) {
@@ -12,7 +13,7 @@ function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }
   return (
     <div
       className="topbar-perfil-usuario"
-      onClick={() => inputRef.current?.click()}   
+      onClick={() => inputRef.current?.click()}
       title="Cambiar foto de perfil"
     >
       <div className="topbar-avatar-wrapper">
@@ -29,14 +30,14 @@ function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }
       </div>
 
       <input
-        ref={inputRef} type="file" accept="image/*" style={{ display: "none" }}  onChange={(e) => {
-          const archivo = e.target.files[0]; 
+        ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => {
+          const archivo = e.target.files[0];
           if (archivo) {
             const lector = new FileReader(); lector.onload = (ev) => onImagenCambio(ev.target.result);
-            lector.readAsDataURL(archivo);  
+            lector.readAsDataURL(archivo);
           }
         }}
-        />
+      />
     </div>
   );
 }
@@ -87,7 +88,7 @@ function ModalUsuario({ visible, usuario, onCerrar }) {
 function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
   const items = [
     { key: "informacion", label: "Información", icono: "/imagenes/dasboard.png" },
-    { key: "usuario",     label: "Usuario",     icono: "/imagenes/perfil.png"   },
+    { key: "usuario", label: "Usuario", icono: "/imagenes/perfil.png" },
   ];
 
   return (
@@ -105,9 +106,9 @@ function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
         <p className="sidebar-nav-seccion-titulo">MI CUENTA</p>
         {items.map(({ key, label, icono }) => (
           <button
-            key={key} 
+            key={key}
             className={`sidebar-nav-item ${vistaActiva === key ? "sidebar-nav-item--activo" : ""}`}
-            onClick={() => setVistaActiva(key)}  
+            onClick={() => setVistaActiva(key)}
           >
             <span className="sidebar-nav-icono">
               <img src={icono} alt={label} className="sidebar-icon-img" />
@@ -131,6 +132,7 @@ function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
 //aqui en vez de una tabla viendo modelos de dashboard para un alumno es mejor enseñarle la información 
 // de forma más grafica y lo más importarnte si quieres añadirle otro campo adelante yo puse esos 4 si te parece bien cualquier me dices okis
 function TarjetaCarnet({ matricula }) {
+  //console.log("matriculaaaaaaa: ", matricula)
   return (
     <div className="alum-tarjeta alum-tarjeta--carnet">
       <div className="alum-tarjeta-header">
@@ -141,24 +143,26 @@ function TarjetaCarnet({ matricula }) {
       </div>
 
       <div className="alum-tarjeta-cuerpo">
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Tipo de carnet</span>
-          <span className="alum-info-valor">{matricula?.tipoCarnet ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Tipo de paquete</span>
-          <span className="alum-info-valor">{matricula?.tipoPaquete ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Clases de conducir</span>
-          <span className="alum-info-valor">{matricula?.gestionesClases ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Clases especiales</span>
-          <span className={`alum-badge ${matricula?.clasesEspeciales ? "alum-badge--si" : "alum-badge--no"}`}>
-            {matricula?.clasesEspeciales ? "Sí" : "No"}
-          </span>
-        </div>
+        {matricula?.map((m, i) => (
+          <div key={i}>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Tipo de carnet</span>
+              <span className="alum-info-valor">{m?.tiposCarnet ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Tipo de paquete</span>
+              <span className="alum-info-valor">{m?.tipoPaquete ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Clases de conducir</span>
+              <span className="alum-info-valor">{m?.clasesConducir ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Clases especiales</span>
+              <span className="alum-info-valor">{m?.clasesEspeciales ?? "---"}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -167,10 +171,11 @@ function TarjetaCarnet({ matricula }) {
 
 // tarjeta sobre el veehiculo 
 function TarjetaVehiculo({ vehiculo }) {
+  //console.log("VEHICULOOOOOOOO", vehiculo)
   return (
     <div className="alum-tarjeta alum-tarjeta--vehiculo">
       <div className="alum-tarjeta-header">
-        <div className="alum-tarjeta-icono-wrap alum-tarjeta-icono-wrap--vehiculo"> 
+        <div className="alum-tarjeta-icono-wrap alum-tarjeta-icono-wrap--vehiculo">
           <img src="/imagenes/vehiculo.png" alt="vehiculo" className="alum-tarjeta-icono" />
         </div>
         <span className="alum-tarjeta-titulo">Vehículo Asignado</span>
@@ -182,24 +187,32 @@ function TarjetaVehiculo({ vehiculo }) {
       )}
 
       <div className="alum-tarjeta-cuerpo">
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Marca</span>
-          <span className="alum-info-valor alum-info-valor--destacado">{vehiculo?.marca ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Modelo</span>
-          <span className="alum-info-valor">{vehiculo?.modelo ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Tipo</span>
-          <span className="alum-info-valor">{vehiculo?.tipo ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Remolque</span>
-          <span className={`alum-badge ${vehiculo?.remolque ? "alum-badge--si" : "alum-badge--no"}`}>
-            {vehiculo?.remolque ? "Sí" : "No"}
-          </span>
-        </div>
+        {vehiculo?.map((v, i) => (
+          <div key={i}>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Nº de vehiculo</span>
+              <span className="alum-info-valor alum-info-valor--destacado">{v?.idVehiculo ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Marca</span>
+              <span className="alum-info-valor alum-info-valor--destacado">{v?.marca ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Modelo</span>
+              <span className="alum-info-valor">{v?.marca ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Tipo</span>
+              <span className="alum-info-valor">{v?.tipo ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Remolque</span>
+              <span className={`alum-badge ${v?.remolque ? "alum-badge--si" : "alum-badge--no"}`}>
+                {v?.remolque ? "Sí" : "No"}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -208,39 +221,43 @@ function TarjetaVehiculo({ vehiculo }) {
 
 // tarjeta para mostrar los datos de que profesor esta asignado el alumno
 function TarjetaProfesor({ profesor }) {
+  console.log("PROFESOR", profesor)
   return (
     <div className="alum-tarjeta alum-tarjeta--profesor">
-      <div className="alum-tarjeta-header">
-        <div className="alum-tarjeta-icono-wrap alum-tarjeta-icono-wrap--profesor">
-          <img src="/imagenes/profesor.png" alt="profesor" className="alum-tarjeta-icono" />
+      {profesor?.map((p, i) => (
+        <div key={i}>
+          <div className="alum-tarjeta-header">
+            <div className="alum-tarjeta-icono-wrap alum-tarjeta-icono-wrap--profesor">
+              <img src="/imagenes/profesor.png" alt="profesor" className="alum-tarjeta-icono" />
+            </div>
+            <span className="alum-tarjeta-titulo">Profesor</span>
+          </div>
+          <div className="alum-profesor-avatar-zona">
+            <img src="/imagenes/profesor.jpg" alt="profesor" className="alum-profesor-foto" />
+            <div>
+              <p className="alum-profesor-nombre">{p?.nombre ?? "---"} {p?.apellidos ?? ""}</p>
+              <p className="alum-profesor-email">{p?.username ?? "---"}</p>
+            </div>
+          </div>
+          <div className="alum-tarjeta-cuerpo">
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Email</span>
+              <span className="alum-info-valor">{p?.username ?? "---"}</span>
+            </div>
+            <div className="alum-info-fila">
+              <span className="alum-info-label">Teléfono</span>
+              <span className="alum-info-valor">{p?.telefono ?? "---"}</span>
+            </div>
+          </div>
         </div>
-        <span className="alum-tarjeta-titulo">Profesor</span>
-      </div>
-      <div className="alum-profesor-avatar-zona">
-        <img src="/imagenes/profesor.jpg" alt="profesor" className="alum-profesor-foto" />
-        <div>
-          <p className="alum-profesor-nombre">{profesor?.nombre ?? "---"} {profesor?.apellidos ?? ""}</p>
-          <p className="alum-profesor-email">{profesor?.email ?? "---"}</p>
-        </div>
-      </div>
-
-      <div className="alum-tarjeta-cuerpo">
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Email</span>
-          <span className="alum-info-valor">{profesor?.email ?? "---"}</span>
-        </div>
-        <div className="alum-info-fila">
-          <span className="alum-info-label">Teléfono</span>
-          <span className="alum-info-valor">{profesor?.telefono ?? "---"}</span>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
 
 function formatFecha(str) {
   if (!str) return "---";                          // si no hay fecha no devuelve nada osea ---
-  const [y, m, d] = str.split("");            
+  const [y, m, d] = str.split("---");            
   const fecha = new Date(y, m - 1, d);          
   return fecha.toLocaleDateString("es-ES", {
     weekday: "long", day: "numeric",
@@ -255,7 +272,7 @@ function TarjetaExamenes({ matricula }) {
     <div className="alum-tarjeta alum-tarjeta--examenes">
       <div className="alum-tarjeta-header">
         <div className="alum-tarjeta-icono-wrap alum-tarjeta-icono-wrap--examenes">
-       <img src="/imagenes/calendario.png" alt="carnet" className="alum-tarjeta-icono" />
+          <img src="/imagenes/calendario.png" alt="carnet" className="alum-tarjeta-icono" />
 
 
         </div>
@@ -263,22 +280,26 @@ function TarjetaExamenes({ matricula }) {
       </div>
 
       <div className="alum-tarjeta-cuerpo">
-        <div className="alum-examen-item alum-examen-item--teorico">
-          <div className="alum-examen-dot alum-examen-dot--teorico"></div>
-          <div>
-            <p className="alum-examen-tipo">Examen Teórico</p>
-            <p className="alum-examen-fecha">{formatFecha(matricula?.fechaTeorico)}</p>
-          </div>
-        </div>
-        <div className="alum-examen-separador"></div>
+        {matricula?.map((m, i) => (
+          <div key={i}>
+            <div className="alum-examen-item alum-examen-item--teorico">
+              <div className="alum-examen-dot alum-examen-dot--teorico"></div>
+              <div>
+                <p className="alum-examen-tipo">Examen Teórico</p>
+                <p className="alum-examen-fecha">{formatFecha(m?.fechaTeorico)}</p>
+              </div>
+            </div>
+            <div className="alum-examen-separador"></div>
 
-        <div className="alum-examen-item alum-examen-item--practico">
-          <div className="alum-examen-dot alum-examen-dot--practico"></div>
-          <div>
-            <p className="alum-examen-tipo">Examen Práctico</p>
-            <p className="alum-examen-fecha">{formatFecha(matricula?.fechaPractico)}</p>
+            <div className="alum-examen-item alum-examen-item--practico">
+              <div className="alum-examen-dot alum-examen-dot--practico"></div>
+              <div>
+                <p className="alum-examen-tipo">Examen Práctico</p>
+                <p className="alum-examen-fecha">{formatFecha(m?.fechaPractico)}</p>
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -291,10 +312,10 @@ function DashboardAlumno() {
   const [imagenPerfil, setImagenPerfil] = useState(null);
   const [vistaActiva, setVistaActiva] = useState("informacion");
   const [modalUsuario, setModalUsuario] = useState(false);
-  const [matricula,   setMatricula]   = useState(null); 
-  const [vehiculo,    setVehiculo]    = useState(null); 
-  const [profesor,    setProfesor]    = useState(null); 
-  const [infoUsuario, setInfoUsuario] = useState(null); 
+  const [matricula, setMatricula] = useState([]);
+  const [vehiculo, setVehiculo] = useState([]);
+  const [profesor, setProfesor] = useState([]);
+  const [infoUsuario, setInfoUsuario] = useState(null);
 
 
   useEffect(() => {
@@ -309,28 +330,28 @@ function DashboardAlumno() {
       } catch (e) { console.log("Error fetch nombre", e); }
     };
     cargar();
-  }, []); 
-  useEffect(() => {
-    const cargar = async () => {
-      const headers = obtenerAuthHeaders();
-      if (!headers) return;
-      try {
-        const res = await fetch(`http://localhost:9002/usuarios/datos/${username}`, {
-          method: "GET", headers
-        });
-        if (res.ok) setInfoUsuario(await res.json());
-      } catch (e) { console.log("Error fetch usuario", e); }
-    };
-    cargar();
   }, []);
+  /* useEffect(() => {
+     const cargar = async () => {
+       const headers = obtenerAuthHeaders();
+       if (!headers) return;
+       try {
+         const res = await fetch(`http://localhost:9002/usuarios/datos/${username}`, {
+           method: "GET", headers
+         });
+         if (res.ok) setInfoUsuario(await res.json());
+       } catch (e) { console.log("Error fetch usuario", e); }
+     };
+     cargar();
+   }, []);*/
 
-//para la matricula de alumno
+  //para la matricula de alumno
   useEffect(() => {
     const cargar = async () => {
       const headers = obtenerAuthHeaders();
       if (!headers) return;
       try {
-        const res = await fetch(`http://localhost:9002/matricula/alumno/${username}`, {
+        const res = await fetch(`http://localhost:9002/matricula/info/${username}`, {
           method: "GET", headers
         });
         if (res.ok) setMatricula(await res.json());
@@ -342,53 +363,69 @@ function DashboardAlumno() {
 
   // para el vehiculo asignado 
   useEffect(() => {
-    const cargar = async () => {
-      const headers = obtenerAuthHeaders();
-      if (!headers) return;
-      try {
-        const res = await fetch(`http://localhost:9002/vehiculo/alumno/${username}`, {
-          method: "GET", headers
-        });
-        if (res.ok) setVehiculo(await res.json());
-      } catch (e) { console.log("Error fetch vehículo", e); }
-    };
-    cargar();
-  }, []);
+    if (!matricula || matricula.length === 0) return;
 
-//para el profesor al que esta asignado el alumno
-  useEffect(() => {
     const cargar = async () => {
       const headers = obtenerAuthHeaders();
       if (!headers) return;
       try {
-        const res = await fetch(`http://localhost:9002/matricula/profesor-de-alumno/${username}`, {
-          method: "GET", headers
-        });
-        if (res.ok) setProfesor(await res.json());
-      } catch (e) { console.log("Error fetch profesor", e); }
+        const resultados = await Promise.all(
+          matricula.map(m =>
+            fetch(`http://localhost:9002/vehiculo/uno/${m.idVehiculo}`, { method: "GET", headers })
+              .then(res => res.ok ? res.json() : null)
+          )
+        );
+        setVehiculo(resultados.filter(Boolean));
+      } catch (e) { console.log("Error fetch vehículos", e); }
     };
     cargar();
-  }, []);
+  }, [matricula]);
+
+
+  //para el profesor al que esta asignado el alumno
+  useEffect(() => {
+    if (!matricula || matricula.length === 0) return;
+
+    const cargar = async () => {
+      const headers = obtenerAuthHeaders();
+      if (!headers) return;
+      try {
+        const resultados = await Promise.all(
+          matricula.map(m =>
+            fetch(`http://localhost:9002/usuarios/usuario-username-dto/${m.usernameProfesor}`, { method: "GET", headers })
+              .then(res => res.ok ? res.json() : null)
+          )
+        );
+        setProfesor(resultados.filter(Boolean));
+      } catch (e) { console.log("Error fetch vehículos", e); }
+    };
+    cargar();
+  }, [matricula]);
+
 
 
   const handleVistaActiva = (key) => {
     if (key === "usuario") {
-      setModalUsuario(true);   
+      setModalUsuario(true);
     } else {
-      setVistaActiva(key);     
+      setVistaActiva(key);
     }
   };
-
-
 
   const fechaHoy = new Date().toLocaleDateString("es-ES", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   }).replace(/^\w/, (c) => c.toUpperCase());
-  const eventosCalendario = matricula
-    ? [{ nombre: nombreCompleto, apellidos: "", fechaTeorico: matricula.fechaTeorico, fechaPractico: matricula.fechaPractico }]
-    : [];
+  
+  const eventosCalendario = matricula.length > 0
+  ? matricula.map(m => ({
+      nombre: nombreCompleto,
+      apellidos: "",
+      fechaTeorico: m.fechaTeorico,
+      fechaPractico: m.fechaPractico
+    }))
+  : [];
 
-return(
+  return (
     <div className="dashboard-contenedor">
       <NavLateralAlumno vistaActiva={vistaActiva} setVistaActiva={handleVistaActiva} />
 
@@ -412,14 +449,14 @@ return(
 
         <div className="dashboard-cuerpo">
           <div className="alum-grid-tarjetas">
-            <TarjetaCarnet   matricula={matricula} />
-            <TarjetaVehiculo vehiculo={vehiculo}   />
-            <TarjetaProfesor profesor={profesor}   />
+            <TarjetaCarnet matricula={matricula} />
+            <TarjetaVehiculo vehiculo={vehiculo} />
+            <TarjetaProfesor profesor={profesor} />
             <TarjetaExamenes matricula={matricula} />
           </div>
           <CalendarioExamenes
             alumnos={eventosCalendario}
-            consulta="" 
+            consulta=""
           />
         </div>
       </div>
@@ -427,7 +464,7 @@ return(
       <ModalUsuario
         visible={modalUsuario}
         usuario={infoUsuario}
-        onCerrar={() => setModalUsuario(false)}   
+        onCerrar={() => setModalUsuario(false)}
       />
     </div>
   );
