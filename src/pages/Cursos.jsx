@@ -483,7 +483,7 @@ function Cursos() {
       category: selectedCategory,
       courseName: cursosData[selectedCourse].name,
       package: item,
-      paqueteKey: `${item.id}-${selectedCourse}`,  // ← clave para PAQUETE_IDS
+      paqueteKey: `${item.id}-${selectedCourse}`,  
       extraClass: extraClass,
       total: item.price + (extraClass ? 25 : 0)
     };
@@ -617,7 +617,7 @@ function Cursos() {
         maxWidth: '500px', width: '90%', textAlign: 'center',
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)', border: '5px solid #032856',
       }}>
-        <div style={{ fontSize: '80px', marginBottom: '20px' }}>🎉</div>
+        <div style={{ fontSize: '80px', marginBottom: '20px' }}></div>
         <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#014495', fontFamily: 'Poppins, sans-serif', marginBottom: '15px' }}>
           ¡Compra realizada!
         </h2>
@@ -640,7 +640,6 @@ function Cursos() {
       </div>
     </div>
   );
-
   // ── VISTA CARRITO ──────────────────────────────────────────────
   if (showCart) {
     return (
@@ -684,7 +683,7 @@ function Cursos() {
                     <button className="checkout-btn" onClick={() => navigate('/login')}>
                       Iniciar sesión para pagar
                     </button>
-                    <p style={{ textAlign: 'center', fontSize: '13px', color: '#747171', marginTop: '10px' }}>
+                    <p style={{ textAlign: 'center', fontSize: '17px', color: '#494444', marginTop: '10px' }}>
                       Debes iniciar sesión para completar la compra
                     </p>
                   </>
@@ -703,7 +702,7 @@ function Cursos() {
                         </button>
                       </div>
                     ) : (
-                      // ✅ PagoPayPal con las props correctas
+                    
                       <PagoPayPal
                         precio={getTotalCart()}
                         idPaquete={PAQUETE_IDS[cart[0]?.paqueteKey] ?? 1}

@@ -1077,6 +1077,13 @@
   line-height: 1.4;
 }
 
+
+.extra-class-label{
+  color: #1596b6;
+  font-weight: 900;
+  font-family: 23px;
+}
+
 .pd-extra-class-row {
   background: #fffce2;
   border: 3px solid #099107;
