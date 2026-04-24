@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import PagoPayPal from '../components/PagoPayPal';
 import ShinyText from "./ShinyText";
 import "./Cursos.css";
+
+const PAQUETE_IDS = {
+  "basico-motos":           1,
+  "estandar-motos":         2,
+  "completo-motos":         3,
+  "basico-coches":          4,
+  "estandar-coches":        5,
+  "completo-coches":        6,
+  "basico-camiones":        7,
+  "estandar-camiones":      8,
+  "completo-camiones":      9,
+  "basico-autobuses":      10,
+  "estandar-autobuses":    11,
+  "completo-autobuses":    12,
+  "basico-profesional":    13,
+  "estandar-profesional":  14,
+  "completo-profesional":  15,
+};
 
 function Cursos() {
   const location = useLocation();
@@ -29,132 +48,30 @@ function Cursos() {
   };
 
   const categorias = [
-    {
-      id: "motos",
-      name: "Moto",
-      icon: "/imagenes/motobtn.png"
-    },
-    {
-      id: "coches",
-      name: "Coche",
-      icon: "/imagenes/cochebtn.png"
-    },
-    {
-      id: "camiones",
-      name: "Camiones",
-      icon: "/imagenes/camionbtn.png"
-    },
-    {
-      id: "autobuses",
-      name: "Autobuses",
-      icon: "/imagenes/busbtn.png"
-    },
-    {
-      id: "cap",
-      name: "CAP",
-      icon: "/imagenes/CAPbtn.png"
-    }
+    { id: "motos",     name: "Moto",      icon: "/imagenes/motobtn.png"  },
+    { id: "coches",    name: "Coche",     icon: "/imagenes/cochebtn.png" },
+    { id: "camiones",  name: "Camiones",  icon: "/imagenes/camionbtn.png"},
+    { id: "autobuses", name: "Autobuses", icon: "/imagenes/busbtn.png"   },
+    { id: "cap",       name: "CAP",       icon: "/imagenes/CAPbtn.png"   }
   ];
 
   const allCarnets = [
-    {
-      id: "am",
-      category: "motos",
-      name: "Permiso AM para ciclomotor",
-      icon: "/imagenes/AM.png",
-      courseId: "motos"
-    },
-    {
-      id: "a1",
-      category: "motos",
-      name: "Permiso A1 para motos hasta 125cc",
-      icon: "/imagenes/A1.png",
-      courseId: "motos"
-    },
-    {
-      id: "a2",
-      category: "motos",
-      name: "Permiso A2 para motos hasta 35kW",
-      icon: "/imagenes/A1.png",
-      courseId: "motos"
-    },
-    {
-      id: "a",
-      category: "motos",
-      name: "Permiso A para motos de cualquier cilindrada",
-      icon: "/imagenes/A.png",
-      courseId: "motos"
-    },
-    {
-      id: "b",
-      category: "coches",
-      name: "Permiso B para turismos",
-      icon: "/imagenes/B.png",
-      courseId: "coches"
-    },
-    {
-      id: "be",
-      category: "coches",
-      name: "Permiso B+E para turismos con remolque",
-      icon: "/imagenes/B+E.png", courseId: "coches"
-    },
-    {
-      id: "c",
-      category: "camiones",
-      name: "Permiso C para camiones",
-      icon: "/imagenes/C.png",
-      courseId: "camiones"
-    },
-    {
-      id: "c1",
-      category: "camiones",
-      name: "Permiso C1 para camiones ligeros",
-      icon: "/imagenes/C1.png",
-      courseId: "camiones"
-    },
-    {
-      id: "c1e",
-      category: "camiones",
-      name: "Permiso C1+E para camiones ligeros con remolque",
-      icon: "/imagenes/C1+E.png", courseId: "camiones"
-    },
-    {
-      id: "ce",
-      category: "camiones",
-      name: "Permiso CE para camiones con remolque",
-      icon: "/imagenes/CE.png",
-      courseId: "camiones"
-    },
-    {
-      id: "d",
-      category: "autobuses",
-      name: "Permiso D para autobuses",
-      icon: "/imagenes/D.png",
-      courseId: "autobuses"
-    },
-    {
-      id: "de",
-      category: "autobuses",
-      name: "Permiso D+E para autobuses con remolque",
-      icon: "/imagenes/D+E.png",
-      courseId: "autobuses"
-    },
-    {
-      id: "d1e",
-      category: "autobuses",
-      name: "Permiso D1+E para minibuses con remolque",
-      icon: "/imagenes/D1+E.png",
-      courseId: "autobuses"
-    },
-    {
-      id: "cap",
-      category: "cap",
-      name: "CAP - Certificado Aptitud Profesional",
-      icon: "/imagenes/CAP.png",
-      courseId: "profesional"
-    }
+    { id: "am",  category: "motos",     name: "Permiso AM para ciclomotor",                    icon: "/imagenes/AM.png",   courseId: "motos"      },
+    { id: "a1",  category: "motos",     name: "Permiso A1 para motos hasta 125cc",              icon: "/imagenes/A1.png",   courseId: "motos"      },
+    { id: "a2",  category: "motos",     name: "Permiso A2 para motos hasta 35kW",               icon: "/imagenes/A1.png",   courseId: "motos"      },
+    { id: "a",   category: "motos",     name: "Permiso A para motos de cualquier cilindrada",   icon: "/imagenes/A.png",    courseId: "motos"      },
+    { id: "b",   category: "coches",    name: "Permiso B para turismos",                        icon: "/imagenes/B.png",    courseId: "coches"     },
+    { id: "be",  category: "coches",    name: "Permiso B+E para turismos con remolque",         icon: "/imagenes/B+E.png",  courseId: "coches"     },
+    { id: "c",   category: "camiones",  name: "Permiso C para camiones",                        icon: "/imagenes/C.png",    courseId: "camiones"   },
+    { id: "c1",  category: "camiones",  name: "Permiso C1 para camiones ligeros",               icon: "/imagenes/C1.png",   courseId: "camiones"   },
+    { id: "c1e", category: "camiones",  name: "Permiso C1+E para camiones ligeros con remolque",icon: "/imagenes/C1+E.png", courseId: "camiones"   },
+    { id: "ce",  category: "camiones",  name: "Permiso CE para camiones con remolque",          icon: "/imagenes/CE.png",   courseId: "camiones"   },
+    { id: "d",   category: "autobuses", name: "Permiso D para autobuses",                       icon: "/imagenes/D.png",    courseId: "autobuses"  },
+    { id: "de",  category: "autobuses", name: "Permiso D+E para autobuses con remolque",        icon: "/imagenes/D+E.png",  courseId: "autobuses"  },
+    { id: "d1e", category: "autobuses", name: "Permiso D1+E para minibuses con remolque",       icon: "/imagenes/D1+E.png", courseId: "autobuses"  },
+    { id: "cap", category: "cap",       name: "CAP - Certificado Aptitud Profesional",          icon: "/imagenes/CAP.png",  courseId: "profesional"}
   ];
-//informacion general de cada tipo de carnet 
+
   const permisosInfoMotos = {
     am: {
       badge: "Permiso AM",
@@ -286,7 +203,7 @@ function Cursos() {
       title: "Información del Permiso C1+E",
       description: "El permiso C1+E te permite conducir camiones ligeros con remolque. Ideal para transporte profesional con remolques. Requiere permiso C1.",
       image: "/imagenes/C1E-info.png",
-      imageClass: "permit-img-c1e", 
+      imageClass: "permit-img-c1e",
       caracteristicas: [
         "Permiso C1 previo obligatorio",
         "Pruebas de test oficiales de la DGT",
@@ -308,7 +225,7 @@ function Cursos() {
         "Camiones articulados para tu aprendizaje",
         "Superar con éxito el examen práctico de maniobras",
         "Maniobras complejas con remolque",
-        "Máximo nivel de formación profesional" 
+        "Máximo nivel de formación profesional"
       ]
     }
   };
@@ -387,116 +304,72 @@ function Cursos() {
       info: [
         "Examen teórico común (excepto si ya tienes el permiso de moto A1 o A2)",
         "Examen de circulación en vías abiertas al tráfico",
-        "Prepárate con Go! Training System, el método de aprendizaje dinámico y divertido con las máximas garantías de aprobado"
+        "Prepárate con Go! Training System"
       ],
-      //paquete del coches 
       permisos: ["B", "B+E"],
-      paquetes: [ 
+      paquetes: [
         {
           id: "basico",
           name: "Paquete Básico",
-          subtitle: "Matrícula + 10 clases", //aqui va la informacion de que incluye cada paquete dependiendo del carnet 
+          subtitle: "Matrícula + 10 clases",
           price: 300,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "estandar",
           name: "Paquete Estándar",
-          subtitle: "Matrícula + 20 clases", //paquete estandar + 20 clase
+          subtitle: "Matrícula + 20 clases",
           price: 500,
           popular: true,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "20 clases prácticas de 45 minutos",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "20 clases prácticas de 45 minutos", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "completo",
           name: "Paquete Completo",
-          subtitle: "Matrícula + 30 clases + 1 clase especial", //paquete especial de coche 
+          subtitle: "Matrícula + 30 clases + 1 clase especial",
           price: 800,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "3 0 clases prácticas de 45 minutos",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente",
-            "Garantía de aprobado"
-          ]
+          includes: ["Matrícula", "30 clases prácticas de 45 minutos", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Garantía de aprobado"]
         }
       ]
     },
-    //paquete de los carnet de moto
     motos: {
       name: "Permisos de Moto",
       image: "/imagenes/A1.png",
-      description: "El permiso AM es el carnet más básico de moto. Permite conducir ciclomotores pequeños, ideales para moverse por ciudad. Edad mínima de: 15 años.",
+      description: "El permiso AM es el carnet más básico de moto. Permite conducir ciclomotores pequeños. Edad mínima: 15 años.",
       info: [
-        "Al aprovar te daremos la V-13 (L).",
+        "Al aprobar te daremos la V-13 (L).",
         "Pruebas de test oficiales de la DGT",
-        "Motos de última generación para tu aprendizaje",
-        "Superar con éxito el examen práctico de maniobras.",
-        "Superar el test psicotécnico en un centro médico autorizado. Maniobras básicas y circulación segura en ciudad"
+        "Motos de última generación para tu aprendizaje"
       ],
       permisos: ["AM", "A1", "A2", "A"],
       paquetes: [
         {
           id: "basico",
           name: "Paquete Básico",
-          subtitle: "Incluye la matricula + 10 clases", //info del paquete basico del carnet AM 
+          subtitle: "Incluye la matrícula + 10 clases",
           price: 250,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "Material didáctico específico moto",
-            "Test online oficiales DGT",
-            "Formación personalizada"
-          ]
+          includes: ["Matrícula", "Material didáctico específico moto", "Test online oficiales DGT", "Formación personalizada"]
         },
         {
           id: "estandar",
           name: "Paquete Estándar",
-          subtitle: "Matrícula + 20 clases",//informacion del paquete estandar del carnet AM 
+          subtitle: "Matrícula + 20 clases",
           price: 450,
           popular: true,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "8 clases prácticas",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "8 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "completo",
           name: "Paquete Completo",
-          subtitle: "Matrícula + 30 clases + 1 clase especial", //paquete completo + una clase especial 
+          subtitle: "Matrícula + 30 clases + 1 clase especial",
           price: 700,
-          image: "/imagenes/paquetegeneral.png", 
-          includes: [
-            "Matrícula",
-            "15 clases prácticas",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente",
-            "Seguro incluido"
-          ]
+          image: "/imagenes/paquetegeneral.png",
+          includes: ["Matrícula", "15 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Seguro incluido"]
         }
       ]
     },
@@ -504,57 +377,33 @@ function Cursos() {
       name: "Permisos de Camión",
       image: "/imagenes/CC.png",
       description: "Permisos profesionales para conducir vehículos pesados. Formación completa y práctica.",
-      info: [
-        "Formación profesional especializada",
-        "Prácticas con camiones reales",
-        "Preparación para examen teórico y práctico"
-      ],
+      info: ["Formación profesional especializada", "Prácticas con camiones reales", "Preparación para examen teórico y práctico"],
       permisos: ["C", "C1", "C1+E", "CE"],
       paquetes: [
         {
           id: "basico",
-          name: "Paquete Básico",//paquete basico de coches 
-          subtitle: "Matrícula + 10 clases",  //el paquete basico con 10 clases 
+          name: "Paquete Básico",
+          subtitle: "Matrícula + 10 clases",
           price: 1000,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "Material didáctico profesional",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "Material didáctico profesional", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "estandar",
           name: "Paquete Estándar",
-          subtitle: "Matrícula + 20 clases",//20 clase del paquete estandar 
-          price: 2000,//precio del paquete 
+          subtitle: "Matrícula + 20 clases",
+          price: 2000,
           popular: true,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "12 clases prácticas",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "12 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "completo",
           name: "Paquete Completo",
-          subtitle: "Matrícula + 30 clases + 1 clase especial", //paquete completo +  1 clase especial 
+          subtitle: "Matrícula + 30 clases + 1 clase especial",
           price: 3000,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "20 clases prácticas",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente",
-            "Bolsa de empleo"
-          ]
+          includes: ["Matrícula", "20 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Bolsa de empleo"]
         }
       ]
     },
@@ -562,57 +411,33 @@ function Cursos() {
       name: "Permisos de Autobús",
       image: "/imagenes/D.png",
       description: "Permisos profesionales para transporte de pasajeros. Fórmate como conductor profesional.",
-      info: [
-        "Formación profesional especializada",
-        "Prácticas con autobuses reales",
-        "Preparación completa para exámenes"
-      ],
+      info: ["Formación profesional especializada", "Prácticas con autobuses reales", "Preparación completa para exámenes"],
       permisos: ["D", "D+E", "D1+E"],
       paquetes: [
         {
           id: "basico",
           name: "Paquete Básico",
-          subtitle: "Matrícula + 10 clases", //paquete basico de autobus 
+          subtitle: "Matrícula + 10 clases",
           price: 950,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "Material didáctico profesional",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "Material didáctico profesional", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "estandar",
           name: "Paquete Estándar",
-          subtitle: "Matrícula + 20 clases",//paquete estandar + 20 clases de autobus
+          subtitle: "Matrícula + 20 clases",
           price: 1350,
           popular: true,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "15 clases prácticas",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente"
-          ]
+          includes: ["Matrícula", "15 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"]
         },
         {
           id: "completo",
           name: "Paquete Completo",
-          subtitle: "Matrícula + 30 clases + 1 clase especial",//paquete completo + 1 clase especial bus
+          subtitle: "Matrícula + 30 clases + 1 clase especial",
           price: 1750,
           image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Matrícula",
-            "25 clases prácticas",
-            "1 examen práctico incluido",
-            "Material didáctico completo",
-            "Test online oficiales DGT",
-            "Tramitación de expediente",
-            "Bolsa de empleo exclusiva"
-          ]
+          includes: ["Matrícula", "25 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Bolsa de empleo exclusiva"]
         }
       ]
     },
@@ -620,11 +445,7 @@ function Cursos() {
       name: "CAP - Certificado Aptitud Profesional",
       image: "/imagenes/CAP.png",
       description: "Certificación obligatoria para conductores profesionales de mercancías y viajeros.",
-      info: [
-        "140 horas de formación obligatoria",
-        "Simulador de conducción avanzada",
-        "Certificación oficial" 
-      ],
+      info: ["140 horas de formación obligatoria", "Simulador de conducción avanzada", "Certificación oficial"],
       permisos: ["CAP"],
       paquetes: [
         {
@@ -633,12 +454,7 @@ function Cursos() {
           subtitle: "Formación completa 140h",
           price: 650,
           image: "/imagenes/paquete-basico-cap.png",
-          includes: [
-            "140 horas de formación",
-            "Material didáctico completo",
-            "Examen incluido",
-            "Tramitación certificado"
-          ]
+          includes: ["140 horas de formación", "Material didáctico completo", "Examen incluido", "Tramitación certificado"]
         },
         {
           id: "estandar",
@@ -647,12 +463,7 @@ function Cursos() {
           price: 280,
           popular: true,
           image: "/imagenes/paquete-estandar-cap.png",
-          includes: [
-            "35 horas de formación",
-            "Material didáctico",
-            "Certificado de renovación",
-            "Tramitación de expediente"
-          ]
+          includes: ["35 horas de formación", "Material didáctico", "Certificado de renovación", "Tramitación de expediente"]
         },
         {
           id: "completo",
@@ -660,14 +471,7 @@ function Cursos() {
           subtitle: "Formación + Bolsa empleo",
           price: 800,
           image: "/imagenes/paquete-completo-cap.png",
-          includes: [
-            "140 horas de formación",
-            "Material didáctico completo",
-            "Simulador avanzado",
-            "Bolsa de empleo exclusiva",
-            "Seguimiento personalizado",
-            "Tramitación certificado"
-          ]
+          includes: ["140 horas de formación", "Material didáctico completo", "Simulador avanzado", "Bolsa de empleo exclusiva", "Seguimiento personalizado", "Tramitación certificado"]
         }
       ]
     }
@@ -679,6 +483,7 @@ function Cursos() {
       category: selectedCategory,
       courseName: cursosData[selectedCourse].name,
       package: item,
+      paqueteKey: `${item.id}-${selectedCourse}`,  // ← clave para PAQUETE_IDS
       extraClass: extraClass,
       total: item.price + (extraClass ? 25 : 0)
     };
@@ -714,35 +519,12 @@ function Cursos() {
   };
 
   const getPermisoInfo = () => {
-    if (selectedCourse === "motos"
-      && selectedCarnet
-      && permisosInfoMotos[selectedCarnet])
-      return permisosInfoMotos[selectedCarnet];
-    if (selectedCourse === "coches"
-      && selectedCarnet
-      && permisosInfoCoches[selectedCarnet])
-      return permisosInfoCoches[selectedCarnet];
-    if (selectedCourse === "camiones"
-      && selectedCarnet
-      && permisosInfoCamiones[selectedCarnet])
-      return permisosInfoCamiones[selectedCarnet];
-    if (selectedCourse === "autobuses"
-      && selectedCarnet
-      && permisosInfoAutobuses[selectedCarnet])
-      return permisosInfoAutobuses[selectedCarnet];
-    if (selectedCourse === "profesional"
-      && selectedCarnet
-      && permisosInfoCAP[selectedCarnet]) return permisosInfoCAP[selectedCarnet];
+    if (selectedCourse === "motos"      && selectedCarnet && permisosInfoMotos[selectedCarnet])    return permisosInfoMotos[selectedCarnet];
+    if (selectedCourse === "coches"     && selectedCarnet && permisosInfoCoches[selectedCarnet])   return permisosInfoCoches[selectedCarnet];
+    if (selectedCourse === "camiones"   && selectedCarnet && permisosInfoCamiones[selectedCarnet]) return permisosInfoCamiones[selectedCarnet];
+    if (selectedCourse === "autobuses"  && selectedCarnet && permisosInfoAutobuses[selectedCarnet])return permisosInfoAutobuses[selectedCarnet];
+    if (selectedCourse === "profesional"&& selectedCarnet && permisosInfoCAP[selectedCarnet])      return permisosInfoCAP[selectedCarnet];
     return null;
-  };
-
-  const handlePagar = () => {
-    if (estaLogueado) {
-      setShowSuccessPopup(true);
-      setCart([]);
-    } else {
-      navigate('/login');
-    }
   };
 
   const handleCompraCompletada = () => {
@@ -766,7 +548,6 @@ function Cursos() {
           </div>
         </div>
       </nav>
-
       <nav className="navbar-main">
         <div className="logo-home">
           <img src="/imagenes/intento2.png" alt="logo" />
@@ -812,10 +593,10 @@ function Cursos() {
           <p>📞 +34 91 123 45 67</p>
           <p>📍 Calle Gran Vía, 45, Madrid</p>
           <div className="footer-socials">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><img src="/imagenes/facebook.png" alt="Facebook" /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="/imagenes/instagram.png" alt="Instagram" /></a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><img src="/imagenes/twitter.png" alt="Twitter" /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><img src="/imagenes/youtube.png" alt="YouTube" /></a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><img src="/imagenes/facebook.png" alt="Facebook" /></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><img src="/imagenes/instagram.png" alt="Instagram" /></a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><img src="/imagenes/twitter.png" alt="Twitter" /></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><img src="/imagenes/youtube.png" alt="YouTube" /></a>
           </div>
         </div>
       </div>
@@ -827,73 +608,32 @@ function Cursos() {
 
   const SuccessPopup = () => (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999,
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', zIndex: 9999,
     }}>
       <div style={{
-        background: 'white',
-        borderRadius: '24px',
-        padding: '60px 50px',
-        maxWidth: '500px',
-        width: '90%',
-        textAlign: 'center',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-        border: '5px solid #032856',
-        animation: 'fadeInUp 0.4s ease',
+        background: 'white', borderRadius: '24px', padding: '60px 50px',
+        maxWidth: '500px', width: '90%', textAlign: 'center',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)', border: '5px solid #032856',
       }}>
-        <div style={{ fontSize: '80px', marginBottom: '20px' }}></div>
-        <h2 style={{
-          fontSize: '32px',
-          fontWeight: '900',
-          color: '#014495',
-          fontFamily: 'Poppins, sans-serif',
-          marginBottom: '15px',
-        }}>¡Compra realizada!</h2>
-        <p style={{
-          fontSize: '18px',
-          color: '#423e3e',
-          fontFamily: 'Poppins, sans-serif',
-          marginBottom: '10px',
-          lineHeight: '1.6',
-        }}>
-          Tu matrícula ha sido procesada correctamente.Bienvenido a Autoescuela Villarey
+        <div style={{ fontSize: '80px', marginBottom: '20px' }}>🎉</div>
+        <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#014495', fontFamily: 'Poppins, sans-serif', marginBottom: '15px' }}>
+          ¡Compra realizada!
+        </h2>
+        <p style={{ fontSize: '18px', color: '#423e3e', fontFamily: 'Poppins, sans-serif', marginBottom: '10px', lineHeight: '1.6' }}>
+          Tu matrícula ha sido procesada correctamente. Bienvenido a Autoescuela Villarey
         </p>
-        <p style={{
-          fontSize: '15px',
-          color: '#4c4242',
-          fontFamily: 'Poppins, sans-serif',
-          marginBottom: '35px',
-        }}>
+        <p style={{ fontSize: '15px', color: '#4c4242', fontFamily: 'Poppins, sans-serif', marginBottom: '35px' }}>
           Recibirás un correo con todos los detalles de tu curso.
         </p>
         <button
-          onClick={() => {
-            setShowSuccessPopup(false);
-            setShowCart(false);
-            navigate('/');
-          }}
+          onClick={() => { setShowSuccessPopup(false); setShowCart(false); navigate('/'); }}
           style={{
-            backgroundColor: '#014495',
-            color: 'white',
-            border: 'none',
-            borderRadius: '14px',
-            padding: '16px 40px',
-            fontSize: '17px',
-            fontWeight: '800',
-            cursor: 'pointer',
-            fontFamily: 'Poppins, sans-serif',
-            transition: 'all 0.3s ease',
+            backgroundColor: '#014495', color: 'white', border: 'none',
+            borderRadius: '14px', padding: '16px 40px', fontSize: '17px',
+            fontWeight: '800', cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
           }}
-          onMouseOver={e => e.target.style.backgroundColor = '#023d7a'}
-          onMouseOut={e => e.target.style.backgroundColor = '#014495'}
         >
           Volver al inicio
         </button>
@@ -901,6 +641,7 @@ function Cursos() {
     </div>
   );
 
+  // ── VISTA CARRITO ──────────────────────────────────────────────
   if (showCart) {
     return (
       <div className="cursos-container">
@@ -932,19 +673,50 @@ function Cursos() {
                   </div>
                 ))}
               </div>
+
               <div className="cart-summary">
                 <h2>Detalles de tu compra</h2>
                 <div className="summary-row"><span>Subtotal</span><span>{getTotalCart()}€</span></div>
                 <div className="summary-row total"><span>TOTAL</span><span>{getTotalCart()}€</span></div>
-                <button className="checkout-btn" onClick={handlePagar}>
-                  {estaLogueado ? "Confirmar compra" : "Pagar"}
-                </button>
-                {!estaLogueado && (
-                  <p style={{ textAlign: 'center', fontSize: '13px', color: '#747171', marginTop: '10px' }}>
-                    Debes iniciar sesión para completar la compra
-                  </p>
+
+                {!estaLogueado ? (
+                  <>
+                    <button className="checkout-btn" onClick={() => navigate('/login')}>
+                      Iniciar sesión para pagar
+                    </button>
+                    <p style={{ textAlign: 'center', fontSize: '13px', color: '#747171', marginTop: '10px' }}>
+                      Debes iniciar sesión para completar la compra
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    {showSuccessPopup ? (
+                      <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <div style={{ fontSize: '50px' }}></div>
+                        <h3 style={{ color: '#014495', fontFamily: 'Poppins', marginTop: '10px' }}>¡Pago completado!</h3>
+                        <p style={{ color: '#555', fontSize: '14px', margin: '10px 0 20px' }}>
+                          Tu matrícula ha sido procesada correctamente.
+                        </p>
+                        <button className="checkout-btn"
+                          onClick={() => { setShowSuccessPopup(false); setShowCart(false); navigate('/'); }}>
+                          Volver al inicio
+                        </button>
+                      </div>
+                    ) : (
+                      // ✅ PagoPayPal con las props correctas
+                      <PagoPayPal
+                        precio={getTotalCart()}
+                        idPaquete={PAQUETE_IDS[cart[0]?.paqueteKey] ?? 1}
+                        onPagoExitoso={() => {
+                          setShowSuccessPopup(true);
+                          setCart([]);
+                        }}
+                        onPagoError={(msg) => alert('Error en el pago: ' + msg)}
+                      />
+                    )}
+                  </>
                 )}
-                <p className="secure-payment">Pago 100% seguro con autoescuela villarey</p>
+                <p className="secure-payment">Pago 100% seguro con Autoescuela Villarey</p>
               </div>
             </div>
           )}
@@ -954,6 +726,7 @@ function Cursos() {
     );
   }
 
+  // ── VISTA DETALLE PAQUETE ──────────────────────────────────────
   if (selectedPackage && selectedCourse) {
     const courseData = cursosData[selectedCourse];
     const packageData = courseData.paquetes.find(p => p.id === selectedPackage);
@@ -965,10 +738,8 @@ function Cursos() {
         <Navbar />
         <div className="package-detail-page">
           <button className="back-button" onClick={() => setSelectedPackage(null)}>← Volver a paquetes</button>
-
           <div className="pd-product-card">
             {packageData.popular && <div className="pd-popular-ribbon">MÁS POPULAR</div>}
-
             <div className="pd-left-col">
               <div className="pd-image-gallery">
                 <div className="pd-main-image">
@@ -976,21 +747,16 @@ function Cursos() {
                 </div>
               </div>
             </div>
-
             <div className="pd-right-col">
               <div className="pd-breadcrumb">
                 <span className="pd-carnet-tag">{carnetBadge}</span>
               </div>
-
               <h1 className="pd-package-name">{packageData.name}</h1>
               <p className="pd-package-subtitle">{packageData.subtitle}</p>
-
               <div className="pd-price-row">
                 <span className="pd-price">{packageData.price}€</span>
               </div>
-
               <div className="pd-divider" />
-
               <div className="pd-includes-section">
                 <h3 className="pd-includes-title">¿Qué incluye?</h3>
                 <ul className="pd-includes-list">
@@ -1002,16 +768,10 @@ function Cursos() {
                   ))}
                 </ul>
               </div>
-
               <div className="pd-divider" />
-
               <div className="pd-extra-class-row">
                 <label className="pd-extra-label">
-                  <input
-                    type="checkbox"
-                    checked={extraClass}
-                    onChange={(e) => setExtraClass(e.target.checked)}
-                  />
+                  <input type="checkbox" checked={extraClass} onChange={(e) => setExtraClass(e.target.checked)} />
                   <div className="pd-extra-text">
                     <span className="pd-extra-title">Añadir clase especial extra</span>
                     <span className="pd-extra-desc">45 minutos de simulacro de examen con examinador</span>
@@ -1019,12 +779,10 @@ function Cursos() {
                   <span className="pd-extra-price">+25€</span>
                 </label>
               </div>
-
               <div className="pd-total-row">
                 <span className="pd-total-label">Total</span>
                 <span className="pd-total-value">{packageData.price + (extraClass ? 25 : 0)}€</span>
               </div>
-
               <div className="pd-action-buttons">
                 <button className="pd-btn-cart" onClick={() => addToCart(packageData)}>Añadir al carrito</button>
                 <button className="pd-btn-buy" onClick={() => buyNow(packageData)}>Comprar ahora</button>
@@ -1037,7 +795,7 @@ function Cursos() {
     );
   }
 
-
+  // ── VISTA DETALLE CURSO ────────────────────────────────────────
   if (selectedCourse) {
     const courseData = cursosData[selectedCourse];
     const permisoInfo = getPermisoInfo();
@@ -1048,44 +806,26 @@ function Cursos() {
           <button className="back-button" onClick={() => { setSelectedCourse(null); setSelectedCarnet(null); }}>
             ← Volver a categorías
           </button>
-
-
           <div className="permit-info-section">
             <div className="permit-info-content">
-
-
               <div className="permit-info-left">
-                <div className="permit-badge">
-                  {permisoInfo ? permisoInfo.badge : courseData.name}
-                </div>
-                <h2 className="permit-title">
-                  {permisoInfo ? permisoInfo.title : `Información del ${courseData.name}`}
-                </h2>
-                <p className="permit-description">
-                  {permisoInfo ? permisoInfo.description : courseData.description}
-                </p>
+                <div className="permit-badge">{permisoInfo ? permisoInfo.badge : courseData.name}</div>
+                <h2 className="permit-title">{permisoInfo ? permisoInfo.title : `Información del ${courseData.name}`}</h2>
+                <p className="permit-description">{permisoInfo ? permisoInfo.description : courseData.description}</p>
                 <div className="requirements-list">
                   <h3>Requisitos y características:</h3>
                   <ul>
                     {(permisoInfo ? permisoInfo.caracteristicas : courseData.info).map((item, index) => (
-                      <li key={index}>
-                        <span className="check-mark">✓</span>
-                        <span>{item}</span>
-                      </li>
+                      <li key={index}><span className="check-mark">✓</span><span>{item}</span></li>
                     ))}
                   </ul>
                 </div>
               </div>
-
               <div className="permit-info-right">
                 <div className={`permit-image-wrapper ${permisoInfo ? permisoInfo.imageClass : ''}`}>
-                  <img
-                    src={permisoInfo ? permisoInfo.image : courseData.image}
-                    alt="Imagen del permiso"
-                  />
+                  <img src={permisoInfo ? permisoInfo.image : courseData.image} alt="Imagen del permiso" />
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -1132,15 +872,14 @@ function Cursos() {
     );
   }
 
-
+  // ── VISTA PRINCIPAL ────────────────────────────────────────────
   return (
     <div className="cursos-container">
       <Navbar />
       <div className="main-page">
         <div className="hero-minimal">
           <h1 id="frontend" className="main-title">Cursos y paquetes</h1>
-        </div> 
-
+        </div>
         <div className="category-filter-section">
           <div className="filter-buttons">
             {categorias.map((categoria) => (
@@ -1158,7 +897,6 @@ function Cursos() {
             <button className="reset-filter" onClick={resetCategory}>Reiniciar ✕</button>
           )}
         </div>
-
         <div className="carnets-grid">
           {getFilteredCarnets().map((carnet) => (
             <div key={carnet.id} className="carnet-card">

@@ -43,6 +43,49 @@ function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }
   );
 }
 
+// modal con los datos personales del alumnoo
+function ModalUsuario({ visible, usuario, onCerrar }) {
+  if (!visible || !usuario) return null;
+  return (
+    <div className="alum-modal-overlay" onClick={onCerrar}>
+      <div className="alum-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="alum-modal-cerrar" onClick={onCerrar}>✕</button>
+
+        <div className="alum-modal-avatar">
+          <img src="/imagenes/sinfoto.jpg" alt="perfil" />
+        </div>
+
+        <h3 className="alum-modal-nombre">{usuario.nombre} {usuario.apellidos}</h3>
+        <span className="alum-modal-username">{usuario.username}</span>
+
+        <div className="alum-modal-grid">
+          <div className="alum-modal-item">
+            <span className="alum-modal-label">DNI</span>
+            <span className="alum-modal-valor">{usuario.dni ?? "---"}</span>
+          </div>
+          <div className="alum-modal-item">
+            <span className="alum-modal-label">Teléfono</span>
+            <span className="alum-modal-valor">{usuario.telefono ?? "---"}</span>
+          </div>
+          <div className="alum-modal-item">
+            <span className="alum-modal-label">Fecha nacimiento</span>
+            <span className="alum-modal-valor">{usuario.fechaNacimiento ?? "---"}</span>
+          </div>
+          <div className="alum-modal-item">
+            <span className="alum-modal-label">Dirección</span>
+            <span className="alum-modal-valor">{usuario.direccion ?? "---"}</span>
+          </div>
+          <div className="alum-modal-item alum-modal-item--full">
+            <span className="alum-modal-label">Fecha de registro</span>
+            <span className="alum-modal-valor">{usuario.fechaRegistro ?? "---"}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// componente del la nav lateral con los datos de que ocupa ver solo el alumno 
 function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
   const items = [
     { key: "informacion", label: "Información", icono: "/imagenes/dasboard.png" },
@@ -202,9 +245,9 @@ function TarjetaProfesor({ profesor }) {
 }
 
 function formatFecha(str) {
-  if (!str) return "---";
-  const [y, m, d] = str.split("-");
-  const fecha = new Date(y, m - 1, d);
+  if (!str) return "---";                          // si no hay fecha no devuelve nada osea ---
+  const [y, m, d] = str.split("---");            
+  const fecha = new Date(y, m - 1, d);          
   return fecha.toLocaleDateString("es-ES", {
     weekday: "long", day: "numeric",
     month: "long", year: "numeric"

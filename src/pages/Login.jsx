@@ -116,6 +116,7 @@ function Login() {
 
             const credenciales = btoa(`${login.username}:${login.password}`);
             localStorage.setItem("auth", credenciales);
+            localStorage.setItem("username", login.username); 
 
             switch (id) {
               case "1":
