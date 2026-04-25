@@ -121,7 +121,7 @@ function RecuperacionPuntos() {
                     <li><Link to="/">Inicio</Link></li>
                     <li><Link to="/cursos">Cursos</Link></li>
                     <li><Link to="/recuperacionPuntos">Recuperación de puntos</Link></li>
-                    <li><a href="https://practicatest.com/tests" target="_blank" rel="noopener noreferrer">Hacer Test</a></li>
+                    <li><Link to="/hacer-test">Hacer test</Link></li>
                     <li><Link to="/login">Iniciar Sesión</Link></li>
                 </ul>
             </nav>
