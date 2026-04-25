@@ -3,18 +3,6 @@ import { useState } from "react";
 import { SharedFooter } from "./Home";
 import "./Recuperacion.css";
 
-const sedes = [
-    "Autoescuela Villarey - Centro (Gran Vía, 45)",
-    "Autoescuela Villarey - Sur (Av. del Sur, 123)",
-    "Autoescuela Villarey - Este (C. del Este, 12)",
-    "Autoescuela Villarey - Oeste (Av. del Oeste, 56)",
-    "Autoescuela Villarey - Chamartín (P. de la Habana, 10)",
-    "Autoescuela Villarey - Retiro (C. de Alcalá, 200)",
-    "Autoescuela Villarey - Moncloa (Glorieta de Moncloa, 5)",
-    "Autoescuela Villarey - Tribunal (C. Serrano, 50)",
-    "Autoescuela Villarey - Chamberí (C. José Abascal, 30)",
-];
-
 const faqs = [
     {
         pregunta: "¿Cómo recuperar los puntos del carnet?",
@@ -38,59 +26,9 @@ const faqs = [
     },
 ];
 
-
-const handlePhoneInput = (e, setter, field, form) => {
-    const val = e.target.value.replace(/\D/g, "").slice(0, 9);
-    setter({ ...form, [field]: val });
-};
-
-
-function RecuperacionPuntos() {
+function Recuperacion() {
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
-    const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState("");
-    const [formData, setFormData] = useState({
-        nombre: "",
-        apellido: "",
-        email: "",
-        telefono: "",
-        centro: "",
-        tipoRecuperacion: "",
-    });
-    const [submitted, setSubmitted] = useState(false);
     const [openFaq, setOpenFaq] = useState(null);
-
-    const openModal = (type) => {
-        setModalType(type);
-        setFormData((prev) => ({
-            ...prev,
-            tipoRecuperacion: type === "parcial" ? "Recuperación Parcial" : "Recuperación Total",
-        }));
-        setSubmitted(false);
-        setShowModal(true);
-    };
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handlePhoneChange = (e) => {
-        const val = e.target.value.replace(/\D/g, "").slice(0, 9);
-        setFormData({ ...formData, telefono: val });
-    };
-
-    const handleSubmit = () => {
-        if (!formData.nombre || !formData.apellido || !formData.email || !formData.centro) {
-            alert("Por favor, rellena todos los campos obligatorios.");
-            return;
-        }
-        if (formData.telefono && formData.telefono.length !== 9) {
-            alert("El teléfono debe tener 9 dígitos.");
-            return;
-        }
-        setSubmitted(true);
-    };
 
     return (
         <div className="recu-page">
@@ -126,6 +64,7 @@ function RecuperacionPuntos() {
                 </ul>
             </nav>
 
+            {/* ── Hero ── */}
             <section className="recu-hero">
                 <div className="recu-hero-overlay"></div>
                 <div className="recu-hero-content">
@@ -138,6 +77,7 @@ function RecuperacionPuntos() {
                 </div>
             </section>
 
+            {/* ── Tarjetas de tipo ── */}
             <section className="recu-tipos-section">
                 <h2 className="recu-section-title">¿QUÉ TIPO DE RECUPERACIÓN NECESITAS?</h2>
                 <div className="recu-tipos-grid">
@@ -158,12 +98,13 @@ function RecuperacionPuntos() {
                                 <li><span className="recu-check">✔</span> Modalidad presencial</li>
                                 <li><span className="recu-check">✔</span> Cada 2 años (1 año profesionales)</li>
                             </ul>
-                            <button className="recu-calendar-btn recu-parcial-btn" onClick={() => openModal("parcial")}>
-                                <img src="/imagenes/calendario.png" alt="calendario" className="recu-calendar-icon-img" />
-                                <span className="recu-calendar-btn-text">
-                                    Ver calendario de cursos<br />y solicitar plaza
-                                </span>
-                            </button>
+                            <Link
+                                to="/cursos?category=recuperacion"
+                                className="recu-calendar-btn recu-parcial-btn"
+                                style={{ textDecoration: 'none', justifyContent: 'center' }}
+                            >
+                                <span className="recu-calendar-btn-text">Ver más detalles</span>
+                            </Link>
                         </div>
                     </div>
 
@@ -183,18 +124,20 @@ function RecuperacionPuntos() {
                                 <li><span className="recu-check">✔</span> Modalidad presencial</li>
                                 <li><span className="recu-check">✔</span> Examen final obligatorio</li>
                             </ul>
-                            <button className="recu-calendar-btn recu-total-btn" onClick={() => openModal("total")}>
-                                <img src="/imagenes/calendario.png" alt="calendario" className="recu-calendar-icon-img recu-calendar-icon-orange" />
-                                <span className="recu-calendar-btn-text">
-                                    Ver calendario de cursos<br />y solicitar plaza
-                                </span>
-                            </button>
+                            <Link
+                                to="/cursos?category=recuperacion"
+                                className="recu-calendar-btn recu-total-btn"
+                                style={{ textDecoration: 'none', justifyContent: 'center' }}
+                            >
+                                <span className="recu-calendar-btn-text">Ver más detalles</span>
+                            </Link>
                         </div>
                     </div>
 
                 </div>
             </section>
 
+            {/* ── Info del curso ── */}
             <section className="recu-info-section">
                 <h2 className="recu-section-title">INFORMACIÓN DEL CURSO</h2>
                 <div className="recu-info-grid">
@@ -204,7 +147,7 @@ function RecuperacionPuntos() {
                     </div>
                     <div className="recu-info-card">
                         <h4>Duración</h4>
-                        <p>Curso parcial: 12 horas.</p>
+                        <p>Curso parcial: 10 horas. Curso total: 20 horas.</p>
                     </div>
                     <div className="recu-info-card">
                         <h4>Modalidad</h4>
@@ -212,19 +155,12 @@ function RecuperacionPuntos() {
                     </div>
                     <div className="recu-info-card">
                         <h4>Certificación</h4>
-                        <p>Certificado homologado por la DGT</p>
+                        <p>Certificado homologado por la DGT.</p>
                     </div>
                 </div>
             </section>
 
-            <section className="recu-form-section" id="inscripcion">
-                <h2 className="recu-section-title">FORMULARIO DE INSCRIPCIÓN</h2>
-                <p className="recu-form-subtitle">Rellena el formulario y nos pondremos en contacto contigo para confirmar tu plaza</p>
-                <div className="recu-form-wrapper">
-                    <InscripcionForm sedes={sedes} />
-                </div>
-            </section>
-
+            {/* ── FAQs ── */}
             <section className="recu-faq-section">
                 <h2 className="recu-section-title recu-faq-title">RESPUESTAS A PREGUNTAS FRECUENTES</h2>
                 <div className="recu-faq-list">
@@ -246,156 +182,8 @@ function RecuperacionPuntos() {
             </section>
 
             <SharedFooter scrollToTop={scrollToTop} />
-
-            {/* Modal solicitar plaza */}
-            {showModal && (
-                <div className="recu-modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="recu-modal" onClick={(e) => e.stopPropagation()}>
-
-                        <button className="recu-modal-close" onClick={() => setShowModal(false)}>✕</button>
-
-                        {!submitted ? (
-                            <>
-                                <h3 className="recu-modal-title">Solicitar Plaza</h3>
-                                <p className="recu-modal-sub">
-                                    {modalType === "parcial"
-                                        ? "Recuperación Parcial — 255€ · 10 horas · hasta 4 puntos"
-                                        : "Recuperación Total — 480€ · 20 horas · hasta 8 puntos"}
-                                </p>
-                                <div className="recu-modal-form">
-                                    <div className="recu-modal-row">
-                                        <div className="recu-modal-field">
-                                            <label>Nombre *</label>
-                                            <input name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Tu nombre" />
-                                        </div>
-                                        <div className="recu-modal-field">
-                                            <label>Apellido *</label>
-                                            <input name="apellido" value={formData.apellido} onChange={handleChange} placeholder="Tu apellido" />
-                                        </div>
-                                    </div>
-                                    <div className="recu-modal-row">
-                                        <div className="recu-modal-field">
-                                            <label>Correo electrónico *</label>
-                                            <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="correo@ejemplo.com" />
-                                        </div>
-                                        <div className="recu-modal-field">
-                                            <label>Teléfono</label>
-                                            <input
-                                                name="telefono"
-                                                value={formData.telefono}
-                                                onChange={handlePhoneChange}
-                                                placeholder="+34 600 000 000"
-                                                maxLength={9}
-                                                inputMode="numeric"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="recu-modal-field">
-                                        <label>Centro *</label>
-                                        <select name="centro" value={formData.centro} onChange={handleChange}>
-                                            <option value="">Selecciona un centro</option>
-                                            {sedes.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                                        </select>
-                                    </div>
-                                    <button className="recu-modal-submit" onClick={handleSubmit}>Enviar solicitud</button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="recu-modal-success">
-                                <h3>¡Solicitud enviada!</h3>
-                                <p>Nos pondremos en contacto contigo en menos de 24 horas para confirmar tu plaza en <strong>{formData.centro}</strong>.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
 
-function InscripcionForm({ sedes }) {
-    const [form, setForm] = useState({
-        nombre: "", apellido: "", email: "", telefono: "",
-        centro: "", tipoRecuperacion: "",
-    });
-    const [sent, setSent] = useState(false);
-
-    const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-    const handlePhone = (e) => {
-        const val = e.target.value.replace(/\D/g, "").slice(0, 9);
-        setForm({ ...form, telefono: val });
-    };
-
-    const submit = () => {
-        if (!form.nombre || !form.apellido || !form.email || !form.centro || !form.tipoRecuperacion) {
-            alert("rellena todos los campos obligatorios");
-            return;
-        }
-        if (form.telefono && form.telefono.length !== 9) {
-            alert("El teléfono debe tener 9 dígitos.");
-            return;
-        }
-        setSent(true);
-    };
-
-    if (sent) return (
-        <div className="recu-inline-success">
-            <img className="check" src="/imagenes/check.png" alt="check" />
-            <h3>¡Inscripción recibida!</h3>
-            <p>Te contactaremos pronto para confirmar tu plaza.</p>
-        </div>
-    );
-
-    return (
-        <div className="recu-inline-form">
-            <div className="recu-inline-row">
-                <div className="recu-inline-field">
-                    <label>Nombre *</label>
-                    <input name="nombre" value={form.nombre} onChange={handle} placeholder="Tu nombre" />
-                </div>
-                <div className="recu-inline-field">
-                    <label>Apellido *</label>
-                    <input name="apellido" value={form.apellido} onChange={handle} placeholder="Tu apellido" />
-                </div>
-            </div>
-            <div className="recu-inline-row">
-                <div className="recu-inline-field">
-                    <label>Correo electrónico *</label>
-                    <input name="email" type="email" value={form.email} onChange={handle} placeholder="correo@ejemplo.com" />
-                </div>
-                <div className="recu-inline-field">
-                    <label>Teléfono</label>
-                    <input
-                        name="telefono"
-                        value={form.telefono}
-                        onChange={handlePhone}
-                        placeholder="+34 600 000 000"
-                        maxLength={9}
-                        inputMode="numeric"
-                    />
-                </div>
-            </div>
-            <div className="recu-inline-row">
-                <div className="recu-inline-field">
-                    <label>Centro *</label>
-                    <select name="centro" value={form.centro} onChange={handle}>
-                        <option value="">Selecciona un centro</option>
-                        {sedes.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                    </select>
-                </div>
-                <div className="recu-inline-field">
-                    <label>Tipo de recuperación *</label>
-                    <select name="tipoRecuperacion" value={form.tipoRecuperacion} onChange={handle}>
-                        <option value="">Seleccionar</option>
-                        <option value="Recuperación Parcial">Recuperación Parcial (10h · 4 pts · 255€)</option>
-                        <option value="Recuperación Total">Recuperación Total (20h · 8 pts · 480€)</option>
-                    </select>
-                </div>
-            </div>
-            <button className="recu-inline-submit" onClick={submit}>Inscribirme</button>
-        </div>
-    );
-}
-
-export default RecuperacionPuntos;
+export default Recuperacion;
