@@ -3,10 +3,10 @@ import "./DashboardAdmin.css";
 import { obtenerUsername, obtenerAuthHeaders } from "../utils/auth";
 import { NavLateral, TopbarPerfil } from "../Components/NavLateral";
 import { AlertaFlotante } from "../Components/SharedUI";
-import { BarraBusqueda } from "../Components/BarraBusqueda";
 import { TarjetasEstadisticas } from "../Components/TarjetasEstadisticas";
 import { TablaAdministradores, TablaProfesores, TablaAlumnos, TablaClientes } from "../Components/Tablas";
-import { MisDatos } from "../Components/Modales";
+import { GraficasPanel } from "../Components/GraficasPanel";
+import { MisDatos } from "../Components/MisDatos";
 
 export function FilaUsuario({ usuario, mostrarVerInfo = false }) {
   return (
@@ -48,7 +48,7 @@ function DashboardAdmin() {
   const username = obtenerUsername();
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [correoUsuario, setCorreoUsuario] = useState("");
-  const [rolActivo, setRolActivo] = useState("administradores");
+  const [rolActivo, setRolActivo] = useState("dashboard");
   const [totalPorRol, setTotalPorRol] = useState({
     administradores: null,
     profesores: null,
@@ -58,8 +58,6 @@ function DashboardAdmin() {
   const [todosUsuarios, setTodosUsuarios] = useState([]);
   const [alerta, setAlerta] = useState({ visible: false, mensaje: "", tipo: "exito" });
   const [imagenPerfil, setImagenPerfil] = useState(null);
-  const [consultaBusqueda, setConsultaBusqueda] = useState("");
-
 
   const fechaHoy = new Date().toLocaleDateString("es-ES", {
     weekday: "long",
@@ -106,25 +104,95 @@ function DashboardAdmin() {
       setTodosUsuarios(todosAcumulados);
     };
     cargarTotales();
-  }, [rolActivo]);
+  }, []);
 
   const mostrarAlerta = (mensaje, tipo = "exito") => {
     setAlerta({ visible: true, mensaje, tipo });
     setTimeout(() => setAlerta((a) => ({ ...a, visible: false })), 3000);
   };
 
-  const renderTabla = () => {
+  const renderContenido = () => {
     switch (rolActivo) {
+      case "dashboard":
+        return (
+          <div className="dashboard-panel">
+            <TarjetasEstadisticas
+              totalPorRol={totalPorRol}
+              rolActivo={rolActivo}
+              setRolActivo={setRolActivo}
+              modoDashboard={true}
+            />
+            <GraficasPanel />
+          </div>
+        );
       case "administradores":
-        return <TablaAdministradores mostrarAlerta={mostrarAlerta} consulta={consultaBusqueda} />;
+        return (
+          <div className="dashboard-cuerpo-usuarios">
+            <TarjetasEstadisticas
+              totalPorRol={totalPorRol}
+              rolActivo={rolActivo}
+              setRolActivo={setRolActivo}
+              modoDashboard={false}
+            />
+            <div className="dashboard-tabla-zona">
+              <TablaAdministradores mostrarAlerta={mostrarAlerta} />
+            </div>
+          </div>
+        );
       case "profesores":
-        return <TablaProfesores mostrarAlerta={mostrarAlerta} consulta={consultaBusqueda} />;
+        return (
+          <div className="dashboard-cuerpo-usuarios">
+            <TarjetasEstadisticas
+              totalPorRol={totalPorRol}
+              rolActivo={rolActivo}
+              setRolActivo={setRolActivo}
+              modoDashboard={false}
+            />
+            <div className="dashboard-tabla-zona">
+              <TablaProfesores mostrarAlerta={mostrarAlerta} />
+            </div>
+          </div>
+        );
       case "alumnos":
-        return <TablaAlumnos mostrarAlerta={mostrarAlerta} consulta={consultaBusqueda} />;
+        return (
+          <div className="dashboard-cuerpo-usuarios">
+            <TarjetasEstadisticas
+              totalPorRol={totalPorRol}
+              rolActivo={rolActivo}
+              setRolActivo={setRolActivo}
+              modoDashboard={false}
+            />
+            <div className="dashboard-tabla-zona">
+              <TablaAlumnos
+                mostrarAlerta={mostrarAlerta}
+                mostrarExportarPdf={false}
+              />
+            </div>
+          </div>
+        );
       case "clientes":
-        return <TablaClientes mostrarAlerta={mostrarAlerta} consulta={consultaBusqueda} />;
+        return (
+          <div className="dashboard-cuerpo-usuarios">
+            <TarjetasEstadisticas
+              totalPorRol={totalPorRol}
+              rolActivo={rolActivo}
+              setRolActivo={setRolActivo}
+              modoDashboard={false}
+            />
+            <div className="dashboard-tabla-zona">
+              <TablaClientes
+                mostrarAlerta={mostrarAlerta}
+                mostrarExportarPdf={false}
+              />
+            </div>
+          </div>
+        );
       case "mis-datos":
-        return <MisDatos mostrarAlerta={mostrarAlerta} />;
+        return (
+          <div className="dashboard-panel">
+            <MisDatos mostrarAlerta={mostrarAlerta} />
+          </div>
+        );
       default:
         return null;
     }
@@ -137,22 +205,16 @@ function DashboardAdmin() {
         setRolActivo={setRolActivo}
         totalPorRol={totalPorRol}
       />
-
       <main className="dashboard-main">
         <AlertaFlotante mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
-
         <div className="dashboard-topbar">
-
-          {/* el bienvenidos + la fecha del dia*/}
           <div className="dashboard-topbar-saludo">
             <h1 className="topbar-saludo-texto">
               Bienvenido, <span className="topbar-saludo-nombre">{nombreUsuario || username}</span>
             </h1>
             <p className="topbar-saludo-sub">{fechaHoy}</p>
           </div>
-
           <div className="topbar-acciones">
-            <BarraBusqueda onConsultaCambio={setConsultaBusqueda} />
             <TopbarPerfil
               nombreUsuario={nombreUsuario || username}
               correoUsuario={correoUsuario}
@@ -162,14 +224,8 @@ function DashboardAdmin() {
             />
           </div>
         </div>
-
         <div className="dashboard-cuerpo">
-          <TarjetasEstadisticas
-            totalPorRol={totalPorRol}
-            rolActivo={rolActivo}
-            setRolActivo={setRolActivo}
-          />
-          <div className="dashboard-tabla-zona">{renderTabla()}</div>
+          {renderContenido()}
         </div>
       </main>
     </div>

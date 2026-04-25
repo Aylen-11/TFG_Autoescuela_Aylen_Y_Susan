@@ -1,6 +1,3 @@
-import { useRef } from "react";
-import { Link } from "react-router-dom";
-
 const categorias = [
   {
     key: "administradores",
@@ -28,13 +25,13 @@ const categorias = [
   },
 ];
 
-export function TarjetasEstadisticas({ totalPorRol, rolActivo, setRolActivo }) {
+export function TarjetasEstadisticas({ totalPorRol, rolActivo, setRolActivo, modoDashboard = false }) {
   return (
-    <div className="tarjetas-estadisticas-grid">
+    <div className={`tarjetas-estadisticas-grid ${modoDashboard ? "tarjetas-estadisticas-grid--dashboard" : ""}`}>
       {categorias.map(({ key, label, icono, color }) => (
         <button
           key={key}
-          className={`tarjeta-estadistica ${rolActivo === key ? "tarjeta-estadistica--activa" : ""}`}
+          className={`tarjeta-estadistica ${rolActivo === key ? "tarjeta-estadistica--activa" : ""} ${modoDashboard ? "tarjeta-estadistica--grande" : ""}`}
           style={{ "--tarjeta-color": color }}
           onClick={() => setRolActivo(key)}
         >
@@ -51,4 +48,3 @@ export function TarjetasEstadisticas({ totalPorRol, rolActivo, setRolActivo }) {
     </div>
   );
 }
-

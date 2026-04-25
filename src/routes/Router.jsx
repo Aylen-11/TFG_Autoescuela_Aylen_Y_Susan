@@ -9,13 +9,10 @@ import Recuperacion from "../pages/Recuperacion";
 
 // Admin
 import DashboardAdmin from "../admin/DashboardAdmin";
-
 // Alumno
 import DashboardAlumno from "../alumno/DashboardAlumno";
-
 // Profesor
 import DashboardProfesor from "../profesor/DashboardProfesor";
-
 
 // Errores
 import Pagina404 from "../errores/Error404"; 
@@ -29,13 +26,10 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/cursos" element={<Cursos/>}/>
         <Route path="/recuperacionPuntos" element={<Recuperacion/>}/>
-        
         {/* Rutas Admin */}
         <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-    
         {/* Rutas Alumno */}
         <Route path="/alumno/dashboard" element={<DashboardAlumno />} />
-    
         {/* Rutas Profesor */}
         <Route path="/profesor/dashboard" element={<DashboardProfesor />} />
 
