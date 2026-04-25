@@ -3,10 +3,9 @@ import { Link } from "react-router-dom";
 import "../admin/DashboardAdmin.css";
 import "./DashboardAlumno.css";
 import CalendarioExamenes from "../Components/CalendarioExamenes";
-import { obtenerAuthHeaders, obtenerUsername } from "../utils/auth"
-import { m } from "motion/react";
+import { obtenerAuthHeaders, obtenerUsername } from "../utils/auth";
+import { MisDatos } from "../Components/Modales";
 
-// componente del perfil del usuario con su fotito de perfil 
 function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }) {
   const inputRef = useRef(null);
 
@@ -30,10 +29,12 @@ function TopbarPerfil({ imagenPerfil, onImagenCambio, nombreCompleto, username }
       </div>
 
       <input
-        ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => {
+        ref={inputRef} type="file" accept="image/*" style={{ display: "none" }}
+        onChange={(e) => {
           const archivo = e.target.files[0];
           if (archivo) {
-            const lector = new FileReader(); lector.onload = (ev) => onImagenCambio(ev.target.result);
+            const lector = new FileReader();
+            lector.onload = (ev) => onImagenCambio(ev.target.result);
             lector.readAsDataURL(archivo);
           }
         }}
@@ -88,7 +89,7 @@ function ModalUsuario({ visible, usuario, onCerrar }) {
 function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
   const items = [
     { key: "informacion", label: "Información", icono: "/imagenes/dasboard.png" },
-    { key: "usuario", label: "Usuario", icono: "/imagenes/perfil.png" },
+    { key: "mis-datos",   label: "Mis datos",   icono: "/imagenes/perfil.png"   },
   ];
 
   return (
@@ -117,6 +118,7 @@ function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
           </button>
         ))}
       </nav>
+
       <div className="sidebar-footer">
         <Link to="/" className="sidebar-cerrar-sesion">
           <span className="sidebar-cerrar-icono">↩</span>
@@ -127,12 +129,7 @@ function NavLateralAlumno({ vistaActiva, setVistaActiva }) {
   );
 }
 
-
-// tarjetita carnet
-//aqui en vez de una tabla viendo modelos de dashboard para un alumno es mejor enseñarle la información 
-// de forma más grafica y lo más importarnte si quieres añadirle otro campo adelante yo puse esos 4 si te parece bien cualquier me dices okis
 function TarjetaCarnet({ matricula }) {
-  //console.log("matriculaaaaaaa: ", matricula)
   return (
     <div className="alum-tarjeta alum-tarjeta--carnet">
       <div className="alum-tarjeta-header">
@@ -141,7 +138,6 @@ function TarjetaCarnet({ matricula }) {
         </div>
         <span className="alum-tarjeta-titulo">Mi Carnet</span>
       </div>
-
       <div className="alum-tarjeta-cuerpo">
         {matricula?.map((m, i) => (
           <div key={i}>
@@ -168,10 +164,7 @@ function TarjetaCarnet({ matricula }) {
   );
 }
 
-
-// tarjeta sobre el veehiculo 
 function TarjetaVehiculo({ vehiculo }) {
-  //console.log("VEHICULOOOOOOOO", vehiculo)
   return (
     <div className="alum-tarjeta alum-tarjeta--vehiculo">
       <div className="alum-tarjeta-header">
@@ -185,7 +178,6 @@ function TarjetaVehiculo({ vehiculo }) {
           <img src={vehiculo.imagen} alt="vehículo" className="alum-vehiculo-img" />
         </div>
       )}
-
       <div className="alum-tarjeta-cuerpo">
         {vehiculo?.map((v, i) => (
           <div key={i}>
@@ -218,10 +210,7 @@ function TarjetaVehiculo({ vehiculo }) {
   );
 }
 
-
-// tarjeta para mostrar los datos de que profesor esta asignado el alumno
 function TarjetaProfesor({ profesor }) {
-  console.log("PROFESOR", profesor)
   return (
     <div className="alum-tarjeta alum-tarjeta--profesor">
       {profesor?.map((p, i) => (
@@ -265,20 +254,15 @@ function formatFecha(str) {
   }).replace(/^\w/, (c) => c.toUpperCase());
 }
 
-
-// tarjeta de examenes resumido el teorico y el práctico 
 function TarjetaExamenes({ matricula }) {
   return (
     <div className="alum-tarjeta alum-tarjeta--examenes">
       <div className="alum-tarjeta-header">
         <div className="alum-tarjeta-icono-wrap alum-tarjeta-icono-wrap--examenes">
           <img src="/imagenes/calendario.png" alt="carnet" className="alum-tarjeta-icono" />
-
-
         </div>
         <span className="alum-tarjeta-titulo">Próximos Exámenes</span>
       </div>
-
       <div className="alum-tarjeta-cuerpo">
         {matricula?.map((m, i) => (
           <div key={i}>
@@ -290,7 +274,6 @@ function TarjetaExamenes({ matricula }) {
               </div>
             </div>
             <div className="alum-examen-separador"></div>
-
             <div className="alum-examen-item alum-examen-item--practico">
               <div className="alum-examen-dot alum-examen-dot--practico"></div>
               <div>
@@ -305,18 +288,24 @@ function TarjetaExamenes({ matricula }) {
   );
 }
 
+function AlertaFlotante({ mensaje, tipo, visible }) {
+  if (!visible) return null;
+  return (
+    <div className={`alerta-flotante alerta-flotante--${tipo}`}>
+      {mensaje}
+    </div>
+  );
+}
 
 function DashboardAlumno() {
   const username = obtenerUsername();
   const [nombreCompleto, setNombreCompleto] = useState("");
   const [imagenPerfil, setImagenPerfil] = useState(null);
   const [vistaActiva, setVistaActiva] = useState("informacion");
-  const [modalUsuario, setModalUsuario] = useState(false);
+  const [alerta, setAlerta] = useState({ visible: false, mensaje: "", tipo: "exito" });
   const [matricula, setMatricula] = useState([]);
   const [vehiculo, setVehiculo] = useState([]);
   const [profesor, setProfesor] = useState([]);
-  const [infoUsuario, setInfoUsuario] = useState(null);
-
 
   useEffect(() => {
     const cargar = async () => {
@@ -331,21 +320,7 @@ function DashboardAlumno() {
     };
     cargar();
   }, []);
-  /* useEffect(() => {
-     const cargar = async () => {
-       const headers = obtenerAuthHeaders();
-       if (!headers) return;
-       try {
-         const res = await fetch(`http://localhost:9002/usuarios/datos/${username}`, {
-           method: "GET", headers
-         });
-         if (res.ok) setInfoUsuario(await res.json());
-       } catch (e) { console.log("Error fetch usuario", e); }
-     };
-     cargar();
-   }, []);*/
 
-  //para la matricula de alumno
   useEffect(() => {
     const cargar = async () => {
       const headers = obtenerAuthHeaders();
@@ -360,11 +335,8 @@ function DashboardAlumno() {
     cargar();
   }, []);
 
-
-  // para el vehiculo asignado 
   useEffect(() => {
     if (!matricula || matricula.length === 0) return;
-
     const cargar = async () => {
       const headers = obtenerAuthHeaders();
       if (!headers) return;
@@ -381,11 +353,8 @@ function DashboardAlumno() {
     cargar();
   }, [matricula]);
 
-
-  //para el profesor al que esta asignado el alumno
   useEffect(() => {
     if (!matricula || matricula.length === 0) return;
-
     const cargar = async () => {
       const headers = obtenerAuthHeaders();
       if (!headers) return;
@@ -397,39 +366,36 @@ function DashboardAlumno() {
           )
         );
         setProfesor(resultados.filter(Boolean));
-      } catch (e) { console.log("Error fetch vehículos", e); }
+      } catch (e) { console.log("Error fetch profesor", e); }
     };
     cargar();
   }, [matricula]);
 
-
-
-  const handleVistaActiva = (key) => {
-    if (key === "usuario") {
-      setModalUsuario(true);
-    } else {
-      setVistaActiva(key);
-    }
+  const mostrarAlerta = (mensaje, tipo = "exito") => {
+    setAlerta({ visible: true, mensaje, tipo });
+    setTimeout(() => setAlerta((a) => ({ ...a, visible: false })), 3000);
   };
 
   const fechaHoy = new Date().toLocaleDateString("es-ES", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   }).replace(/^\w/, (c) => c.toUpperCase());
-  
+
   const eventosCalendario = matricula.length > 0
-  ? matricula.map(m => ({
-      nombre: nombreCompleto,
-      apellidos: "",
-      fechaTeorico: m.fechaTeorico,
-      fechaPractico: m.fechaPractico
-    }))
-  : [];
+    ? matricula.map(m => ({
+        nombre: nombreCompleto,
+        apellidos: "",
+        fechaTeorico: m.fechaTeorico,
+        fechaPractico: m.fechaPractico
+      }))
+    : [];
 
   return (
     <div className="dashboard-contenedor">
-      <NavLateralAlumno vistaActiva={vistaActiva} setVistaActiva={handleVistaActiva} />
+      <NavLateralAlumno vistaActiva={vistaActiva} setVistaActiva={setVistaActiva} />
 
       <div className="dashboard-main">
+        <AlertaFlotante mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
+
         <div className="dashboard-topbar">
           <div>
             <p className="topbar-saludo-texto">
@@ -448,24 +414,23 @@ function DashboardAlumno() {
         </div>
 
         <div className="dashboard-cuerpo">
-          <div className="alum-grid-tarjetas">
-            <TarjetaCarnet matricula={matricula} />
-            <TarjetaVehiculo vehiculo={vehiculo} />
-            <TarjetaProfesor profesor={profesor} />
-            <TarjetaExamenes matricula={matricula} />
-          </div>
-          <CalendarioExamenes
-            alumnos={eventosCalendario}
-            consulta=""
-          />
+          {vistaActiva === "informacion" && (
+            <>
+              <div className="alum-grid-tarjetas">
+                <TarjetaCarnet matricula={matricula} />
+                <TarjetaVehiculo vehiculo={vehiculo} />
+                <TarjetaProfesor profesor={profesor} />
+                <TarjetaExamenes matricula={matricula} />
+              </div>
+              <CalendarioExamenes alumnos={eventosCalendario} consulta="" />
+            </>
+          )}
+
+          {vistaActiva === "mis-datos" && (
+            <MisDatos mostrarAlerta={mostrarAlerta} />
+          )}
         </div>
       </div>
-
-      <ModalUsuario
-        visible={modalUsuario}
-        usuario={infoUsuario}
-        onCerrar={() => setModalUsuario(false)}
-      />
     </div>
   );
 }

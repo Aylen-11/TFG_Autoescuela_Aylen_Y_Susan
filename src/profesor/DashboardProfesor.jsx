@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../admin/DashboardAdmin.css";
 import "./DashboardProfesor.css"; 
 import { obtenerAuthHeaders, obtenerUsername } from "../utils/auth";
-
+import {MisDatos} from "../Components/Modales"
 
 function formatDate(str) {
   if (!str) return "—";
@@ -48,7 +48,7 @@ export function TopbarPerfil({imagenPerfil, onImagenCambio, nombreCompleto, user
   );
 }
 
-function NavLateralProfesor() {
+function NavLateralProfesor({ vistaActiva, setVistaActiva }) {
   return (
     <aside className="sidebar-lateral">
       <div className="sidebar-logo-zona">
@@ -62,19 +62,25 @@ function NavLateralProfesor() {
 
       <nav className="sidebar-nav">
         <p className="sidebar-nav-seccion-titulo">MIS ALUMNOS</p>
-        <button className="sidebar-nav-item sidebar-nav-item--activo">
+        <button
+          className={`sidebar-nav-item ${vistaActiva === "alumnos" ? "sidebar-nav-item--activo" : ""}`}
+          onClick={() => setVistaActiva("alumnos")}
+        >
           <span className="sidebar-nav-icono">
             <img src="/imagenes/alumno.png" alt="Alumnos" className="sidebar-icon-img" />
           </span>
           <span className="sidebar-nav-label">Alumnos</span>
         </button>
-        
-           <p className="sidebar-nav-seccion-titulo">Perfil</p>
-         <button className="sidebar-nav-item sidebar-nav-item--activo">
+
+        <p className="sidebar-nav-seccion-titulo">CUENTA</p>
+        <button
+          className={`sidebar-nav-item ${vistaActiva === "mis-datos" ? "sidebar-nav-item--activo" : ""}`}
+          onClick={() => setVistaActiva("mis-datos")}
+        >
           <span className="sidebar-nav-icono">
-            <img src="/imagenes/perfil.png" alt="Alumnos" className="sidebar-icon-img" />
+            <img src="/imagenes/perfil.png" alt="Perfil" className="sidebar-icon-img" />
           </span>
-          <span className="sidebar-nav-label">perfil</span>
+          <span className="sidebar-nav-label">Mis datos</span>
         </button>
       </nav>
 
@@ -323,7 +329,7 @@ function AlertaFlotante({ mensaje, tipo, visible }) {
 }
 
 function DashboardProfesor() {
-
+  const [vistaActiva, setVistaActiva] = useState("alumnos"); 
   const [alumnos, setAlumnos] = useState([]);
   const [consulta, setConsulta] = useState("");
   const [imagenPerfil, setImagenPerfil] = useState(null);
@@ -368,7 +374,7 @@ function DashboardProfesor() {
 
   return (
     <div className="dashboard-contenedor">
-      <NavLateralProfesor />
+      <NavLateralProfesor vistaActiva={vistaActiva} setVistaActiva={setVistaActiva} />
 
       <div className="dashboard-main">
         <AlertaFlotante   mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
@@ -393,16 +399,22 @@ function DashboardProfesor() {
           </div>
         </div>
 
-        <div className="dashboard-cuerpo">
+       <div className="dashboard-cuerpo">
+          {vistaActiva === "alumnos" && ( 
+            <>
+              <div className="prof-fila-principal">
+                <TarjetaAlumnosProfesor total={alumnos.length} />
+                <div className="prof-tabla-zona">
+                  <TablaAlumnosProfesor alumnos={alumnos} consulta={consulta} />
+                </div>
+              </div>
+              <Calendario alumnos={alumnos} consulta={consulta} />
+            </>
+          )}
 
-          <div className="prof-fila-principal">
-            <TarjetaAlumnosProfesor total={alumnos.length} />
-            <div className="prof-tabla-zona">
-              <TablaAlumnosProfesor alumnos={alumnos} consulta={consulta} />
-            </div>
-          </div>
-
-          <Calendario alumnos={alumnos} consulta={consulta} />
+          {vistaActiva === "mis-datos" && ( 
+            <MisDatos mostrarAlerta={mostrarAlerta} />
+          )}
         </div>
       </div>
     </div>

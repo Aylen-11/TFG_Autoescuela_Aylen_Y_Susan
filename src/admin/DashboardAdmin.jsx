@@ -6,6 +6,7 @@ import { AlertaFlotante } from "../Components/SharedUI";
 import { BarraBusqueda } from "../Components/BarraBusqueda";
 import { TarjetasEstadisticas } from "../Components/TarjetasEstadisticas";
 import { TablaAdministradores, TablaProfesores, TablaAlumnos, TablaClientes } from "../Components/Tablas";
+import { MisDatos } from "../Components/Modales";
 
 export function FilaUsuario({ usuario, mostrarVerInfo = false }) {
   return (
@@ -122,6 +123,8 @@ function DashboardAdmin() {
         return <TablaAlumnos mostrarAlerta={mostrarAlerta} consulta={consultaBusqueda} />;
       case "clientes":
         return <TablaClientes mostrarAlerta={mostrarAlerta} consulta={consultaBusqueda} />;
+      case "mis-datos":
+        return <MisDatos mostrarAlerta={mostrarAlerta} />;
       default:
         return null;
     }
