@@ -6,6 +6,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Cursos from "../pages/Cursos";
 import Recuperacion from "../pages/Recuperacion";
+import HacerTest from "../pages/HacerTest";
 
 // Admin
 import DashboardAdmin from "../admin/DashboardAdmin";
@@ -26,6 +27,7 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/cursos" element={<Cursos/>}/>
         <Route path="/recuperacionPuntos" element={<Recuperacion/>}/>
+        
         {/* Rutas Admin */}
         <Route path="/admin/dashboard" element={<DashboardAdmin />} />
         {/* Rutas Alumno */}
