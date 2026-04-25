@@ -27,7 +27,6 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/cursos" element={<Cursos/>}/>
         <Route path="/recuperacionPuntos" element={<Recuperacion/>}/>
-<<<<<<<<< Temporary merge branch 1
         <Route path="/hacer-test" element={<HacerTest />} />
         
         {/* Rutas Admin */}
