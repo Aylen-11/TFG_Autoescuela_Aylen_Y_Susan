@@ -559,8 +559,9 @@ function Cursos() {
         </div>
         <ul className="nav-main-links">
           <li><Link to="/" onClick={scrollToTop}>Inicio</Link></li>
+          <li><Link to="/cursos">Cursos</Link></li>
           <li><Link to="/recuperacionPuntos">Recuperación de puntos</Link></li>
-          <li><a href="https://practicatest.com/tests" target="_blank" rel="noopener noreferrer">Hacer Test</a></li>
+          <li><Link to="/hacer-test">Hacer test</Link></li>
           <li><Link to="/login">Iniciar Sesión</Link></li>
           <li className="cart-icon" onClick={() => setShowCart(true)}>
             <img src="/imagenes/carrito.png" alt="Carrito" className="cart-image" />
@@ -584,7 +585,7 @@ function Cursos() {
             <li><Link to="/cursos" onClick={scrollToTop}>Nuestros Cursos</Link></li>
             <li><Link to="/" onClick={scrollToTop}>¿Qué Carnet Buscas?</Link></li>
             <li><Link to="/recuperacionPuntos" onClick={scrollToTop}>Recuperación de Puntos</Link></li>
-            <li><a href="https://practicatest.com/tests" target="_blank" rel="noopener noreferrer">Test Online</a></li>
+            <li><Link to="/hacer-test" onClick={scrollToTop}>Hacer test</Link></li>
           </ul>
         </div>
         <div className="footer-contact-section">
