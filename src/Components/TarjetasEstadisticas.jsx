@@ -3,25 +3,25 @@ const categorias = [
     key: "administradores",
     label: "Administradores",
     icono: "/imagenes/admin.png",
-    color: "#002983"
+    color: "#1b439a"
   },
   {
     key: "profesores",
     label: "Profesores",
     icono: "/imagenes/profesor.png",
-    color: "#04568c"
+    color: "#7fb5da"
   },
   {
     key: "alumnos",
     label: "Alumnos",
     icono: "/imagenes/alumno.png",
-    color: "#2989dc"
+    color: "#acc24c"
   },
   {
     key: "clientes",
     label: "Clientes",
     icono: "/imagenes/cliente.png",
-    color: "#25d3cb"
+    color: "#3da4a4"
   },
 ];
 
