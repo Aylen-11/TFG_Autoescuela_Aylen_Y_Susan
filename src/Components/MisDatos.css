@@ -12,6 +12,7 @@
 
 .mis-datos-campo--full {
   grid-column: 1 / -1 !important;
+  
 }
 
 .mis-datos-campo-fila {
@@ -60,7 +61,7 @@
 
 .mis-datos-btn--lapiz {
   background: #e0ecff !important;
-  color: #1d5fbd !important;
+  color: #062d62 !important;
 }
 .mis-datos-btn--lapiz:hover { background: #c7deff !important; }
 

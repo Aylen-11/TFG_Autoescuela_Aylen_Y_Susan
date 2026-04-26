@@ -47,7 +47,7 @@ export function SharedFooter({ scrollToTop }) {
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <img src="/imagenes/facebook.png" alt="Facebook" />
             </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <a href="https://www.instagram.com/autoescuelavillarey/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <img src="/imagenes/instagram.png" alt="Instagram" />
             </a>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
@@ -474,7 +474,7 @@ function Home() {
         </div>
       </section>
 
-      {/*consejos de como pasar el todo */}
+  
       <section className="driving-tips-section">
         <div className="road-decoration road-top">
           <div className="road-line"></div>
