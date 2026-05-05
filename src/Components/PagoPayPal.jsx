@@ -13,7 +13,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
   useEffect(() => {
     const username = obtenerUsername();
-    const headers  = obtenerAuthHeaders();
+    const headers = obtenerAuthHeaders();
 
     if (!username || !headers) {
       onPagoError("Sesión no encontrada. Inicia sesión de nuevo.");
@@ -59,7 +59,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
 
   const registrarMatricula = async () => {
-    const payload = {
+    const form = {
       psicotecnico: false,
       pago: true,
       tasaDgt: false,
@@ -67,21 +67,23 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
       usernameProfesor: "profesor1@autoescuela.com",
       tiposCarnet: tipoCarnet,
       idVehiculo: 3,
-      tipoPaquete,
-      fechaTeorico: null,
-      fechaPractico: null,
+      tipoPaquete: tipoPaquete,
+      fechaTeorico: "2026-02-15",
+      fechaPractico: "2026-02-15",
     };
 
-    console.log("Registrando matrícula:", payload);
+    console.log("Registrando matrícula:", form);
+    const headers = obtenerAuthHeaders();
 
-    const res = await fetch(`${API_URL}/matricula/alta-dto`, {
+    const res = await fetch('http://localhost:9002/matricula/alta-dto', {
       method: "POST",
-      headers: obtenerAuthHeaders(),
-      body: JSON.stringify(payload),
+      headers,
+      body: JSON.stringify(form),
     });
 
     if (!res.ok) {
       const text = await res.text();
+      console.error("Error backend matrícula:", text);
       throw new Error(`Error registrando matrícula: ${res.status} - ${text}`);
     }
 
@@ -107,11 +109,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
     if (result.status === "PAGO_COMPLETADO") {
       try {
-        // 2️⃣ Registrar matrícula
-        const matricula = await registrarMatricula();
-        console.log("Matrícula registrada:", matricula);
-
-        // 3️⃣ Cambiar rol a alumno (rol 3)
+        // 2️⃣ Cambiar rol a alumno (rol 3) PRIMERO
         const resRol = await fetch(`${API_URL}/rol/modificar/${usernameAlumno}/3`, {
           method: "PUT",
           headers: obtenerAuthHeaders(),
@@ -123,16 +121,19 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
           console.log("Rol cambiado a alumno correctamente");
         }
 
+        // 3️⃣ Registrar matrícula DESPUÉS (ahora ya tiene rol alumno)
+        const matricula = await registrarMatricula();
+        console.log("Matrícula registrada:", matricula);
+
       } catch (err) {
         console.warn("Pago OK pero error en post-proceso:", err.message);
       } finally {
-        // 4️⃣ Siempre redirigir si el pago fue correcto
         setEstado('exito');
         onPagoExitoso(result);
-        window.location.href = "/alumno/dashboard";
+        window.location.href = "/dashboard-alumno";
       }
-
     } else {
+      // ← esto faltaba
       setEstado('error');
       setMensajeError("El pago no se completó correctamente.");
       onPagoError("El pago no se completó correctamente.");
