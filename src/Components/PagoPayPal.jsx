@@ -4,30 +4,38 @@ import './PagoPaypal.css';
 
 const API_URL = 'http://localhost:9002';
 
-function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso, onPagoError }) {
-  const [idUsuario, setIdUsuario] = useState(null);
-  const [usernameAlumno, setUsernameAlumno] = useState(null);
-  const [estado, setEstado] = useState('idle');
+function PagoPayPal({ precio, idPaquete, onPagoExitoso, onPagoError }) {
+  const [idUsuario, setIdUsuario]   = useState(null);
+  const [estado, setEstado]         = useState('idle'); 
   const [mensajeError, setMensajeError] = useState('');
 
   useEffect(() => {
     const username = localStorage.getItem("username");
-    const auth = localStorage.getItem("auth");
+    const auth     = localStorage.getItem("auth");
+
+    console.log("username:", username);
+    console.log("auth:", auth);
 
     if (!username || !auth) {
+      console.log("No hay sesión guardada");
       onPagoError("Sesión no encontrada. Inicia sesión de nuevo.");
       return;
     }
 
-    setUsernameAlumno(username);
-
     fetch(`${API_URL}/usuarios/buscarid/${username}`)
       .then(res => {
+        console.log("Status buscarid:", res.status);
         if (!res.ok) throw new Error("Error " + res.status);
         return res.json();
       })
-      .then(id => setIdUsuario(id))
-      .catch(() => onPagoError("No se pudo identificar tu usuario."));
+      .then(id => {
+        console.log("idUsuario obtenido:", id);
+        setIdUsuario(id);
+      })
+      .catch(err => {
+        console.error("Error fetch buscarid:", err);
+        onPagoError("No se pudo identificar tu usuario.");
+      });
   }, []);
 
 
@@ -36,10 +44,12 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
       onPagoError("No se pudo identificar tu usuario.");
       throw new Error("idUsuario no disponible");
     }
+
     setEstado('procesando');
 
     const auth = localStorage.getItem("auth");
-    const url = `${API_URL}/paypal/crear-orden?precio=${precio}&idUsuario=${idUsuario}&idPaquete=${idPaquete}`;
+    const url  = `${API_URL}/paypal/crear-orden?precio=${precio}&idUsuario=${idUsuario}&idPaquete=${idPaquete}`;
+    console.log("Llamando a:", url);
 
     const response = await fetch(url, {
       method: "POST",
@@ -55,48 +65,12 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
     }
 
     const data = await response.json();
+    console.log("OrderID creado:", data.orderID);
     return data.orderID;
   };
 
-
-  const registrarMatricula = async (auth) => {
-    const payload = {
-      psicotecnico: false,
-      pago: true,
-      tasaDgt: false,
-      usernameAlumno: usernameAlumno,
-      usernameProfesor: "profesor1@autoescuela.com",
-      tiposCarnet: tipoCarnet,
-      idVehiculo: 3,
-      tipoPaquete: tipoPaquete,
-      fechaTeorico: null,
-      fechaPractico: null,
-    };
-
-    console.log("Registrando matrícula:", payload);
-
-    const res = await fetch(`${API_URL}/matricula/alta-dto`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Basic " + auth,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Error registrando matrícula: ${res.status} - ${text}`);
-    }
-
-    return await res.json();
-  };
-
-
   const onApprove = async (data) => {
-    const auth = localStorage.getItem("auth");
-
-    // 1️⃣ Capturar el pago en PayPal
+    const auth     = localStorage.getItem("auth");
     const response = await fetch(
       `${API_URL}/paypal/capturar-orden/${data.orderID}`,
       { method: "POST", headers: { "Authorization": "Basic " + auth } }
@@ -110,41 +84,15 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
     }
 
     const result = await response.json();
-
     if (result.status === "PAGO_COMPLETADO") {
-      try {
-        // 2️⃣ Registrar matrícula
-        const matricula = await registrarMatricula(auth);
-        console.log("Matrícula registrada:", matricula);
-
-        // 3️⃣ Cambiar rol a alumno (rol 3)
-        const resRol = await fetch(`${API_URL}/rol/modificar/${usernameAlumno}/3`, {
-          method: "PUT",
-          headers: { "Authorization": "Basic " + auth },
-        });
-
-        if (!resRol.ok) {
-          console.warn("Error cambiando rol:", resRol.status);
-        } else {
-          console.log("Rol cambiado a alumno correctamente");
-        }
-
-      } catch (err) {
-        console.warn("Pago OK pero error en post-proceso:", err.message);
-      } finally {
-        // 4️⃣ Siempre redirigir si el pago fue correcto
-        setEstado('exito');
-        onPagoExitoso(result);
-        window.location.href = "/dashboard-alumno";
-      }
-
+      setEstado('exito');
+      onPagoExitoso(result);
     } else {
       setEstado('error');
       setMensajeError("El pago no se completó correctamente.");
       onPagoError("El pago no se completó correctamente.");
     }
   };
-
 
   const handleError = (err) => {
     const msg = 'Error en PayPal: ' + err;
@@ -160,19 +108,22 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
   return (
     <div className="pp-wrapper">
+
+      {/* Tarjeta decorativa siempre visible arriba */}
       <div className={`pp-card ${estado === 'procesando' ? 'pp-card--procesando' : ''} ${estado === 'exito' ? 'pp-card--exito' : ''} ${estado === 'error' ? 'pp-card--error' : ''}`}>
         <div className="pp-card__chip" />
         <div className="pp-card__logo">
-          {estado === 'exito' && <span className="pp-icon pp-icon--ok">✓</span>}
-          {estado === 'error' && <span className="pp-icon pp-icon--fail">✕</span>}
+          {estado === 'exito'  && <span className="pp-icon pp-icon--ok">✓</span>}
+          {estado === 'error'  && <span className="pp-icon pp-icon--fail">✕</span>}
           {estado !== 'exito' && estado !== 'error' && <span className="pp-card__brand">PayPal</span>}
         </div>
         <div className="pp-card__numero">**** **** **** ***</div>
         <div className="pp-card__footer">
           <span className="pp-card__label">Total</span>
-          <span className="pp-card__precio">{precio} €</span>
+          <span className="pp-card__precio">${precio} €</span>
         </div>
 
+    
         {estado === 'procesando' && (
           <div className="pp-overlay">
             <div className="pp-spinner" />
@@ -193,6 +144,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
         )}
       </div>
 
+    
       {(estado === 'idle' || estado === 'procesando') && (
         <div className="pp-paypal-area">
           {!idUsuario ? (
@@ -209,6 +161,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
         </div>
       )}
 
+    
       {estado === 'error' && (
         <button className="pp-btn-reintentar" onClick={() => setEstado('idle')}>
           Intentar de nuevo
