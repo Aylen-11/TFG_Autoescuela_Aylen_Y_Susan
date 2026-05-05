@@ -68,8 +68,8 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
       tiposCarnet: tipoCarnet,
       idVehiculo: 3,
       tipoPaquete,
-      fechaTeorico: null,
-      fechaPractico: null,
+      fechaTeorico: "2026-02-15", 
+  fechaPractico: "2026-02-15",
     };
 
     console.log("Registrando matrícula:", payload);
