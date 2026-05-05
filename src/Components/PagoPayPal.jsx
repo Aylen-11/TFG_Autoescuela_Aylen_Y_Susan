@@ -92,10 +92,27 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
 
   const onApprove = async (data) => {
-    // 1️⃣ Capturar el pago en PayPal
+    const matriculaPayload = {
+      psicotecnico: false,
+      pago: true,
+      tasaDgt: false,
+      usernameAlumno,
+      usernameProfesor: "profesor1@autoescuela.com",
+      tiposCarnet: tipoCarnet,
+      idVehiculo: 3,
+      tipoPaquete: tipoPaquete,
+      fechaTeorico: "2026-02-15",
+      fechaPractico: "2026-02-15",
+    };
+
+    // 1️⃣ Capturar pago + crear matrícula en el mismo endpoint
     const response = await fetch(
       `${API_URL}/paypal/capturar-orden/${data.orderID}`,
-      { method: "POST", headers: obtenerAuthHeaders() }
+      {
+        method: "POST",
+        headers: obtenerAuthHeaders(),
+        body: JSON.stringify(matriculaPayload),  // ← el back lo recibe y crea la matrícula
+      }
     );
 
     if (!response.ok) {
@@ -109,7 +126,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
     if (result.status === "PAGO_COMPLETADO") {
       try {
-        // 2️⃣ Cambiar rol a alumno (rol 3) PRIMERO
+        // 2️⃣ Solo queda cambiar el rol
         const resRol = await fetch(`${API_URL}/rol/modificar/${usernameAlumno}/3`, {
           method: "PUT",
           headers: obtenerAuthHeaders(),
@@ -121,25 +138,20 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
           console.log("Rol cambiado a alumno correctamente");
         }
 
-        // 3️⃣ Registrar matrícula DESPUÉS (ahora ya tiene rol alumno)
-        const matricula = await registrarMatricula();
-        console.log("Matrícula registrada:", matricula);
-
       } catch (err) {
-        console.warn("Pago OK pero error en post-proceso:", err.message);
+        console.warn("Error en post-proceso:", err.message);
       } finally {
         setEstado('exito');
         onPagoExitoso(result);
         window.location.href = "/dashboard-alumno";
       }
+
     } else {
-      // ← esto faltaba
       setEstado('error');
       setMensajeError("El pago no se completó correctamente.");
       onPagoError("El pago no se completó correctamente.");
     }
   };
-
 
   const handleError = (err) => {
     const msg = 'Error en PayPal: ' + err;
