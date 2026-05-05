@@ -1,6 +1,7 @@
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { useEffect, useState } from 'react';
 import './PagoPaypal.css';
+import { obtenerUsername, obtenerAuthHeaders } from '../utils/auth'; // ajusta la ruta
 
 const API_URL = 'http://localhost:9002';
 
@@ -11,17 +12,17 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
   const [mensajeError, setMensajeError] = useState('');
 
   useEffect(() => {
-    const username = localStorage.getItem("username");
-    const auth = localStorage.getItem("auth");
+    const username = obtenerUsername();
+    const headers  = obtenerAuthHeaders();
 
-    if (!username || !auth) {
+    if (!username || !headers) {
       onPagoError("Sesión no encontrada. Inicia sesión de nuevo.");
       return;
     }
 
     setUsernameAlumno(username);
 
-    fetch(`${API_URL}/usuarios/buscarid/${username}`)
+    fetch(`${API_URL}/usuarios/buscarid/${username}`, { headers })
       .then(res => {
         if (!res.ok) throw new Error("Error " + res.status);
         return res.json();
@@ -38,12 +39,10 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
     }
     setEstado('procesando');
 
-    const auth = localStorage.getItem("auth");
     const url = `${API_URL}/paypal/crear-orden?precio=${precio}&idUsuario=${idUsuario}&idPaquete=${idPaquete}`;
-
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Authorization": "Basic " + auth }
+      headers: obtenerAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -59,28 +58,25 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
   };
 
 
-  const registrarMatricula = async (auth) => {
+  const registrarMatricula = async () => {
     const payload = {
       psicotecnico: false,
       pago: true,
       tasaDgt: false,
-      usernameAlumno: usernameAlumno,
+      usernameAlumno,
       usernameProfesor: "profesor1@autoescuela.com",
       tiposCarnet: tipoCarnet,
       idVehiculo: 3,
-      tipoPaquete: tipoPaquete,
-      fechaTeorico: "2026-02-15",
-      fechaPractico: "2026-02-15",
+      tipoPaquete,
+      fechaTeorico: null,
+      fechaPractico: null,
     };
 
     console.log("Registrando matrícula:", payload);
 
     const res = await fetch(`${API_URL}/matricula/alta-dto`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Basic " + auth,
-      },
+      headers: obtenerAuthHeaders(),
       body: JSON.stringify(payload),
     });
 
@@ -94,12 +90,10 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
 
   const onApprove = async (data) => {
-    const auth = localStorage.getItem("auth");
-
     // 1️⃣ Capturar el pago en PayPal
     const response = await fetch(
       `${API_URL}/paypal/capturar-orden/${data.orderID}`,
-      { method: "POST", headers: { "Authorization": "Basic " + auth } }
+      { method: "POST", headers: obtenerAuthHeaders() }
     );
 
     if (!response.ok) {
@@ -114,13 +108,13 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
     if (result.status === "PAGO_COMPLETADO") {
       try {
         // 2️⃣ Registrar matrícula
-        const matricula = await registrarMatricula(auth);
+        const matricula = await registrarMatricula();
         console.log("Matrícula registrada:", matricula);
 
         // 3️⃣ Cambiar rol a alumno (rol 3)
         const resRol = await fetch(`${API_URL}/rol/modificar/${usernameAlumno}/3`, {
           method: "PUT",
-          headers: { "Authorization": "Basic " + auth },
+          headers: obtenerAuthHeaders(),
         });
 
         if (!resRol.ok) {
@@ -135,7 +129,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
         // 4️⃣ Siempre redirigir si el pago fue correcto
         setEstado('exito');
         onPagoExitoso(result);
-        window.location.href = "/dashboard-alumno";
+        window.location.href = "/alumno/dashboard";
       }
 
     } else {
