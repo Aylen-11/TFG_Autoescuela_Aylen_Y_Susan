@@ -5,21 +5,21 @@ import './PagoPaypal.css';
 const API_URL = 'http://localhost:9002';
 
 function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso, onPagoError }) {
-  const [idUsuario, setIdUsuario]   = useState(null);
+  const [idUsuario, setIdUsuario] = useState(null);
   const [usernameAlumno, setUsernameAlumno] = useState(null);
-  const [estado, setEstado]         = useState('idle');
+  const [estado, setEstado] = useState('idle');
   const [mensajeError, setMensajeError] = useState('');
 
   useEffect(() => {
     const username = localStorage.getItem("username");
-    const auth     = localStorage.getItem("auth");
+    const auth = localStorage.getItem("auth");
 
     if (!username || !auth) {
       onPagoError("Sesión no encontrada. Inicia sesión de nuevo.");
       return;
     }
 
-    setUsernameAlumno(username); // guardamos el username directamente
+    setUsernameAlumno(username);
 
     fetch(`${API_URL}/usuarios/buscarid/${username}`)
       .then(res => {
@@ -39,7 +39,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
     setEstado('procesando');
 
     const auth = localStorage.getItem("auth");
-    const url  = `${API_URL}/paypal/crear-orden?precio=${precio}&idUsuario=${idUsuario}&idPaquete=${idPaquete}`;
+    const url = `${API_URL}/paypal/crear-orden?precio=${precio}&idUsuario=${idUsuario}&idPaquete=${idPaquete}`;
 
     const response = await fetch(url, {
       method: "POST",
@@ -60,18 +60,15 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
 
 
   const registrarMatricula = async (auth) => {
-    // Buscamos datos del paquete para confirmar tipoPaquete exacto si hace falta
-    // pero ya nos llega como prop, así que lo usamos directamente
-
     const payload = {
       psicotecnico: false,
       pago: true,
       tasaDgt: false,
       usernameAlumno: usernameAlumno,
       usernameProfesor: "profesor1@autoescuela.com",
-      tiposCarnet: tipoCarnet,          // ej: "B", "AM", "C"…
+      tiposCarnet: tipoCarnet,
       idVehiculo: 3,
-      tipoPaquete: tipoPaquete,         // ej: "Básico coche", "Estándar motos"…
+      tipoPaquete: tipoPaquete,
       fechaTeorico: null,
       fechaPractico: null,
     };
@@ -92,7 +89,7 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
       throw new Error(`Error registrando matrícula: ${res.status} - ${text}`);
     }
 
-    return await res.json(); // devuelve la matrícula creada
+    return await res.json();
   };
 
 
@@ -115,29 +112,39 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
     const result = await response.json();
 
     if (result.status === "PAGO_COMPLETADO") {
-      // 2️⃣ Registrar la matrícula en la BBDD
       try {
+        // 2️⃣ Registrar matrícula
         const matricula = await registrarMatricula(auth);
         console.log("Matrícula registrada:", matricula);
-        setEstado('exito');
-        onPagoExitoso(result);
 
-        // 3️⃣ Redirigir al dashboard del alumno
-        window.location.href = "/dashboard-alumno";
+        // 3️⃣ Cambiar rol a alumno (rol 3)
+        const resRol = await fetch(`${API_URL}/rol/modificar/${usernameAlumno}/3`, {
+          method: "PUT",
+          headers: { "Authorization": "Basic " + auth },
+        });
+
+        if (!resRol.ok) {
+          console.warn("Error cambiando rol:", resRol.status);
+        } else {
+          console.log("Rol cambiado a alumno correctamente");
+        }
+
       } catch (err) {
-        console.error(err);
-        // El pago fue bien pero falló el alta de matrícula — avisamos pero no bloqueamos
+        console.warn("Pago OK pero error en post-proceso:", err.message);
+      } finally {
+        // 4️⃣ Siempre redirigir si el pago fue correcto
         setEstado('exito');
         onPagoExitoso(result);
-        console.warn("Pago completado pero error al registrar matrícula:", err.message);
         window.location.href = "/dashboard-alumno";
       }
+
     } else {
       setEstado('error');
       setMensajeError("El pago no se completó correctamente.");
       onPagoError("El pago no se completó correctamente.");
     }
   };
+
 
   const handleError = (err) => {
     const msg = 'Error en PayPal: ' + err;
@@ -156,14 +163,14 @@ function PagoPayPal({ precio, idPaquete, tipoPaquete, tipoCarnet, onPagoExitoso,
       <div className={`pp-card ${estado === 'procesando' ? 'pp-card--procesando' : ''} ${estado === 'exito' ? 'pp-card--exito' : ''} ${estado === 'error' ? 'pp-card--error' : ''}`}>
         <div className="pp-card__chip" />
         <div className="pp-card__logo">
-          {estado === 'exito'  && <span className="pp-icon pp-icon--ok">✓</span>}
-          {estado === 'error'  && <span className="pp-icon pp-icon--fail">✕</span>}
+          {estado === 'exito' && <span className="pp-icon pp-icon--ok">✓</span>}
+          {estado === 'error' && <span className="pp-icon pp-icon--fail">✕</span>}
           {estado !== 'exito' && estado !== 'error' && <span className="pp-card__brand">PayPal</span>}
         </div>
         <div className="pp-card__numero">**** **** **** ***</div>
         <div className="pp-card__footer">
           <span className="pp-card__label">Total</span>
-          <span className="pp-card__precio">${precio} €</span>
+          <span className="pp-card__precio">{precio} €</span>
         </div>
 
         {estado === 'procesando' && (
