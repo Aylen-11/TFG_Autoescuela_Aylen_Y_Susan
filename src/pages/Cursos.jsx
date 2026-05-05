@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import PagoPayPal from '../components/PagoPayPal';
 import ShinyText from "./ShinyText";
@@ -20,9 +20,9 @@ const PAQUETE_IDS = {
   "basico-profesional": 13,
   "estandar-profesional": 14,
   "completo-profesional": 15,
-  "basico-recuperacion": 17,  // Estandar recuperacion 10h (id_paquete=17 en BBDD)
-  "estandar-recuperacion": 20,  // Estandar recuperacion 20h (id_paquete=20)
-  "completo-recuperacion": 21,  // Completo recuperacion 20h (id_paquete=21)
+  "basico-recuperacion": 17,
+  "estandar-recuperacion": 20,
+  "completo-recuperacion": 21,
 };
 
 function Cursos() {
@@ -38,9 +38,12 @@ function Cursos() {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const estaLogueado = !!localStorage.getItem("auth");
 
+  // ── Al montar: procesar params de URL ────────────────────────
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
+    const volverCarrito = params.get('volverCarrito');
+
     if (category) {
       setSelectedCategory(category);
       if (category === 'recuperacion') {
@@ -48,41 +51,56 @@ function Cursos() {
         setSelectedCarnet('recuperacion');
       }
     }
+
+    // Si venimos del login con carrito guardado, restaurarlo y abrir el carrito
+    if (volverCarrito === 'true') {
+      const carritoGuardado = sessionStorage.getItem("carritoAntesDePagar");
+      if (carritoGuardado) {
+        try {
+          const carritoParseado = JSON.parse(carritoGuardado);
+          setCart(carritoParseado);
+          setShowCart(true);
+          sessionStorage.removeItem("carritoAntesDePagar");
+          sessionStorage.removeItem("volverAlCarrito");
+        } catch (e) {
+          console.error("Error al restaurar el carrito:", e);
+        }
+      }
+    }
   }, [location]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  const categorias = [
-    { id: "motos", name: "Moto", icon: "/imagenes/motobtn.png" },
-    { id: "coches", name: "Coche", icon: "/imagenes/cochebtn.png" },
-    { id: "camiones", name: "Camiones", icon: "/imagenes/camionbtn.png" },
-    { id: "autobuses", name: "Autobuses", icon: "/imagenes/busbtn.png" },
-    { id: "cap", name: "CAP", icon: "/imagenes/CAPbtn.png" },
 
+  const categorias = [
+    { id: "motos",    name: "Moto",      icon: "/imagenes/motobtn.png"   },
+    { id: "coches",   name: "Coche",     icon: "/imagenes/cochebtn.png"  },
+    { id: "camiones", name: "Camiones",  icon: "/imagenes/camionbtn.png" },
+    { id: "autobuses",name: "Autobuses", icon: "/imagenes/busbtn.png"    },
+    { id: "cap",      name: "CAP",       icon: "/imagenes/CAPbtn.png"    },
   ];
 
   const allCarnets = [
-    { id: "am", category: "motos", name: "Permiso AM para ciclomotor", icon: "/imagenes/AM.png", courseId: "motos" },
-    { id: "a1", category: "motos", name: "Permiso A1 para motos hasta 125cc", icon: "/imagenes/A1.png", courseId: "motos" },
-    { id: "a2", category: "motos", name: "Permiso A2 para motos hasta 35kW", icon: "/imagenes/A1.png", courseId: "motos" },
-    { id: "a", category: "motos", name: "Permiso A para motos de cualquier cilindrada", icon: "/imagenes/A.png", courseId: "motos" },
-    { id: "b", category: "coches", name: "Permiso B para turismos", icon: "/imagenes/B.png", courseId: "coches" },
-    { id: "be", category: "coches", name: "Permiso B+E para turismos con remolque", icon: "/imagenes/B+E.png", courseId: "coches" },
-    { id: "c", category: "camiones", name: "Permiso C para camiones", icon: "/imagenes/C.png", courseId: "camiones" },
-    { id: "c1", category: "camiones", name: "Permiso C1 para camiones ligeros", icon: "/imagenes/C1.png", courseId: "camiones" },
-    { id: "c1e", category: "camiones", name: "Permiso C1+E para camiones ligeros con remolque", icon: "/imagenes/C1+E.png", courseId: "camiones" },
-    { id: "ce", category: "camiones", name: "Permiso CE para camiones con remolque", icon: "/imagenes/CE.png", courseId: "camiones" },
-    { id: "d", category: "autobuses", name: "Permiso D para autobuses", icon: "/imagenes/D.png", courseId: "autobuses" },
-    { id: "de", category: "autobuses", name: "Permiso D+E para autobuses con remolque", icon: "/imagenes/D+E.png", courseId: "autobuses" },
-    { id: "d1e", category: "autobuses", name: "Permiso D1+E para minibuses con remolque", icon: "/imagenes/D1+E.png", courseId: "autobuses" },
-    { id: "cap", category: "cap", name: "CAP - Certificado Aptitud Profesional", icon: "/imagenes/CAP.png", courseId: "profesional" },
-    { id: "recuperacion", category: "recuperacion", name: "Recuperación de Puntos", icon: "/imagenes/puntos.png", courseId: "recuperacion" },
+    { id: "am",          category: "motos",      name: "Permiso AM para ciclomotor",                    icon: "/imagenes/AM.png",   courseId: "motos"        },
+    { id: "a1",          category: "motos",      name: "Permiso A1 para motos hasta 125cc",             icon: "/imagenes/A1.png",   courseId: "motos"        },
+    { id: "a2",          category: "motos",      name: "Permiso A2 para motos hasta 35kW",              icon: "/imagenes/A1.png",   courseId: "motos"        },
+    { id: "a",           category: "motos",      name: "Permiso A para motos de cualquier cilindrada",  icon: "/imagenes/A.png",    courseId: "motos"        },
+    { id: "b",           category: "coches",     name: "Permiso B para turismos",                       icon: "/imagenes/B.png",    courseId: "coches"       },
+    { id: "be",          category: "coches",     name: "Permiso B+E para turismos con remolque",        icon: "/imagenes/B+E.png",  courseId: "coches"       },
+    { id: "c",           category: "camiones",   name: "Permiso C para camiones",                       icon: "/imagenes/C.png",    courseId: "camiones"     },
+    { id: "c1",          category: "camiones",   name: "Permiso C1 para camiones ligeros",              icon: "/imagenes/C1.png",   courseId: "camiones"     },
+    { id: "c1e",         category: "camiones",   name: "Permiso C1+E para camiones ligeros con remolque", icon: "/imagenes/C1+E.png", courseId: "camiones"  },
+    { id: "ce",          category: "camiones",   name: "Permiso CE para camiones con remolque",         icon: "/imagenes/CE.png",   courseId: "camiones"     },
+    { id: "d",           category: "autobuses",  name: "Permiso D para autobuses",                      icon: "/imagenes/D.png",    courseId: "autobuses"    },
+    { id: "de",          category: "autobuses",  name: "Permiso D+E para autobuses con remolque",       icon: "/imagenes/D+E.png",  courseId: "autobuses"    },
+    { id: "d1e",         category: "autobuses",  name: "Permiso D1+E para minibuses con remolque",      icon: "/imagenes/D1+E.png", courseId: "autobuses"    },
+    { id: "cap",         category: "cap",        name: "CAP - Certificado Aptitud Profesional",         icon: "/imagenes/CAP.png",  courseId: "profesional"  },
+    { id: "recuperacion",category: "recuperacion",name: "Recuperación de Puntos",                       icon: "/imagenes/puntos.png",courseId: "recuperacion"},
   ];
 
-  // ── Info permiso recuperación ─────────────────────────────────
   const permisosInfoRecuperacion = {
     recuperacion: {
       badge: "Recuperación",
-      title: "Como puedes recuper puntos ",
+      title: "Como puedes recuperar puntos",
       description: "Cursos homologados por la DGT para recuperar hasta 8 puntos del carnet de conducir. Formación presencial en centros autorizados con profesores especializados.",
       image: "/imagenes/puntoss.png",
       imageClass: "permit-img-cap",
@@ -97,7 +115,6 @@ function Cursos() {
     },
   };
 
-  // ── Datos de cursos (añadido recuperacion) ────────────────────
   const cursosData = {
     coches: {
       name: "Permiso B - Coche",
@@ -110,9 +127,9 @@ function Cursos() {
       ],
       permisos: ["B", "B+E"],
       paquetes: [
-        { id: "basico", name: "Paquete Básico", subtitle: "Matrícula + 10 clases", price: 300, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
-        { id: "estandar", name: "Paquete Estándar", subtitle: "Matrícula + 20 clases", price: 500, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "20 clases prácticas de 45 minutos", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
-        { id: "completo", name: "Paquete Completo", subtitle: "Matrícula + 30 clases + 1 clase especial", price: 800, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "30 clases prácticas de 45 minutos", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Garantía de aprobado"] },
+        { id: "basico",   name: "Paquete Básico",    subtitle: "Matrícula + 10 clases",                 price: 300, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
+        { id: "estandar", name: "Paquete Estándar",  subtitle: "Matrícula + 20 clases",                 price: 500, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "20 clases prácticas de 45 minutos", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
+        { id: "completo", name: "Paquete Completo",  subtitle: "Matrícula + 30 clases + 1 clase especial", price: 800, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "30 clases prácticas de 45 minutos", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Garantía de aprobado"] },
       ],
     },
     motos: {
@@ -122,9 +139,9 @@ function Cursos() {
       info: ["Al aprobar te daremos la V-13 (L).", "Pruebas de test oficiales de la DGT", "Motos de última generación para tu aprendizaje"],
       permisos: ["AM", "A1", "A2", "A"],
       paquetes: [
-        { id: "basico", name: "Paquete Básico", subtitle: "Incluye la matrícula + 10 clases", price: 250, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico específico moto", "Test online oficiales DGT", "Formación personalizada"] },
-        { id: "estandar", name: "Paquete Estándar", subtitle: "Matrícula + 20 clases", price: 450, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "8 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
-        { id: "completo", name: "Paquete Completo", subtitle: "Matrícula + 30 clases + 1 clase especial", price: 700, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "15 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Seguro incluido"] },
+        { id: "basico",   name: "Paquete Básico",   subtitle: "Incluye la matrícula + 10 clases",          price: 250, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico específico moto", "Test online oficiales DGT", "Formación personalizada"] },
+        { id: "estandar", name: "Paquete Estándar", subtitle: "Matrícula + 20 clases",                     price: 450, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "8 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
+        { id: "completo", name: "Paquete Completo", subtitle: "Matrícula + 30 clases + 1 clase especial",  price: 700, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "15 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Seguro incluido"] },
       ],
     },
     camiones: {
@@ -134,7 +151,7 @@ function Cursos() {
       info: ["Formación profesional especializada", "Prácticas con camiones reales", "Preparación para examen teórico y práctico"],
       permisos: ["C", "C1", "C1+E", "CE"],
       paquetes: [
-        { id: "basico", name: "Paquete Básico", subtitle: "Matrícula + 10 clases", price: 1000, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico profesional", "Test online oficiales DGT", "Tramitación de expediente"] },
+        { id: "basico",   name: "Paquete Básico",   subtitle: "Matrícula + 10 clases", price: 1000, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico profesional", "Test online oficiales DGT", "Tramitación de expediente"] },
         { id: "estandar", name: "Paquete Estándar", subtitle: "Matrícula + 20 clases", price: 2000, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "12 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
         { id: "completo", name: "Paquete Completo", subtitle: "Matrícula + 30 clases + 1 clase especial", price: 3000, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "20 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Bolsa de empleo"] },
       ],
@@ -146,7 +163,7 @@ function Cursos() {
       info: ["Formación profesional especializada", "Prácticas con autobuses reales", "Preparación completa para exámenes"],
       permisos: ["D", "D+E", "D1+E"],
       paquetes: [
-        { id: "basico", name: "Paquete Básico", subtitle: "Matrícula + 10 clases", price: 950, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico profesional", "Test online oficiales DGT", "Tramitación de expediente"] },
+        { id: "basico",   name: "Paquete Básico",   subtitle: "Matrícula + 10 clases", price: 950,  image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "Material didáctico profesional", "Test online oficiales DGT", "Tramitación de expediente"] },
         { id: "estandar", name: "Paquete Estándar", subtitle: "Matrícula + 20 clases", price: 1350, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "15 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente"] },
         { id: "completo", name: "Paquete Completo", subtitle: "Matrícula + 30 clases + 1 clase especial", price: 1750, image: "/imagenes/paquetegeneral.png", includes: ["Matrícula", "25 clases prácticas", "1 examen práctico incluido", "Material didáctico completo", "Test online oficiales DGT", "Tramitación de expediente", "Bolsa de empleo exclusiva"] },
       ],
@@ -158,113 +175,65 @@ function Cursos() {
       info: ["140 horas de formación obligatoria", "Simulador de conducción avanzada", "Certificación oficial"],
       permisos: ["CAP"],
       paquetes: [
-        { id: "basico", name: "CAP Básico", subtitle: "Formación completa 140h", price: 650, image: "/imagenes/cap.webp", includes: ["140 horas de formación", "Material didáctico completo", "Examen incluido", "Tramitación certificado"] },
-        { id: "estandar", name: "CAP Estándar", subtitle: "Renovación 35h", price: 280, popular: true, image: "/imagenes/cap.webp", includes: ["35 horas de formación", "Material didáctico", "Certificado de renovación", "Tramitación de expediente"] },
-        { id: "completo", name: "CAP Completo", subtitle: "Formación + Bolsa empleo", price: 800, image: "/imagenes/cap.webp", includes: ["140 horas de formación", "Material didáctico completo", "Simulador avanzado", "Bolsa de empleo exclusiva", "Seguimiento personalizado", "Tramitación certificado"] },
+        { id: "basico",   name: "CAP Básico",    subtitle: "Formación completa 140h", price: 650, image: "/imagenes/cap.webp", includes: ["140 horas de formación", "Material didáctico completo", "Examen incluido", "Tramitación certificado"] },
+        { id: "estandar", name: "CAP Estándar",  subtitle: "Renovación 35h",          price: 280, popular: true, image: "/imagenes/cap.webp", includes: ["35 horas de formación", "Material didáctico", "Certificado de renovación", "Tramitación de expediente"] },
+        { id: "completo", name: "CAP Completo",  subtitle: "Formación + Bolsa empleo",price: 800, image: "/imagenes/cap.webp", includes: ["140 horas de formación", "Material didáctico completo", "Simulador avanzado", "Bolsa de empleo exclusiva", "Seguimiento personalizado", "Tramitación certificado"] },
       ],
     },
-
-    // ── Recuperación de puntos (paquetes de la BBDD) ──────────
     recuperacion: {
       name: "Recuperación de Puntos",
-      image: "/imagenes/CAP.png",   // ← pon aquí la imagen cuando la tengas
+      image: "/imagenes/CAP.png",
       description: "Cursos homologados por la DGT para recuperar hasta 8 puntos del carnet de conducir.",
       info: ["Hasta 4 puntos con 10h o hasta 8 puntos con 20h", "Cursos homologados DGT", "Modalidad presencial"],
       permisos: ["Recuperación"],
       paquetes: [
-        {
-          id: "basico",
-          name: "Recuperación 20h",
-          subtitle: "Recuperación Parcial · hasta 4 puntos",
-          price: 250,
-          image: "/imagenes/paquetegeneral.png",   // ← cambia cuando tengas la imagen
-          includes: [
-            "Curso de 10 horas presencial",
-            "Hasta 4 puntos recuperados",
-            "Material didáctico incluido",
-            "Tasa DGT incluida (90€)",
-            "Derecho a examen (40€)",
-            "Tramitación de expediente",
-          ],
-        },
-        {
-          id: "estandar",
-          name: "Recuperación 20h",
-          subtitle: "Recuperación Parcial Plus · hasta 4 puntos",
-          price: 458,
-          popular: true,
-          image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Curso de 10 horas presencial",
-            "Hasta 4 puntos recuperados",
-            "Material didáctico premium",
-            "Tasa DGT incluida (90€)",
-            "Derecho a examen (40€)",
-            "Tramitación de expediente",
-            "Apoyo personalizado",
-          ],
-        },
-        {
-          id: "completo",
-          name: "Recuperación 20h",
-          subtitle: "Recuperación Total · hasta 8 puntos",
-          price: 555,
-          image: "/imagenes/paquetegeneral.png",
-          includes: [
-            "Curso de 20 horas presencial",
-            "Hasta 8 puntos recuperados",
-            "Material didáctico premium",
-            "Tasa DGT incluida (90€)",
-            "Derecho a examen (40€)",
-            "Tramitación de expediente",
-            "Examen final obligatorio",
-            "Seguimiento personalizado",
-          ],
-        },
+        { id: "basico",   name: "Recuperación 10h", subtitle: "Recuperación Parcial · hasta 4 puntos",      price: 250, image: "/imagenes/paquetegeneral.png", includes: ["Curso de 10 horas presencial", "Hasta 4 puntos recuperados", "Material didáctico incluido", "Tasa DGT incluida (90€)", "Derecho a examen (40€)", "Tramitación de expediente"] },
+        { id: "estandar", name: "Recuperación 20h", subtitle: "Recuperación Parcial Plus · hasta 4 puntos", price: 458, popular: true, image: "/imagenes/paquetegeneral.png", includes: ["Curso de 10 horas presencial", "Hasta 4 puntos recuperados", "Material didáctico premium", "Tasa DGT incluida (90€)", "Derecho a examen (40€)", "Tramitación de expediente", "Apoyo personalizado"] },
+        { id: "completo", name: "Recuperación 20h", subtitle: "Recuperación Total · hasta 8 puntos",        price: 555, image: "/imagenes/paquetegeneral.png", includes: ["Curso de 20 horas presencial", "Hasta 8 puntos recuperados", "Material didáctico premium", "Tasa DGT incluida (90€)", "Derecho a examen (40€)", "Tramitación de expediente", "Examen final obligatorio", "Seguimiento personalizado"] },
       ],
     },
   };
 
-  // ── Infos permisos existentes ─────────────────────────────────
   const permisosInfoMotos = {
-    am: { badge: "Permiso AM", title: "-Información del Permiso AM", description: "El permiso AM es el carnet más básico de moto. Permite conducir ciclomotores pequeños, ideales para moverse por ciudad. Edad mínima: 15 años.", image: "/imagenes/Cursosmoto.png", imageClass: "permit-img-am", caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Ciclomotores de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado", "Maniobras básicas y circulación segura en ciudad"] },
-    a1: { badge: "Permiso A1", title: "-Información del Permiso A1", description: "El permiso A1 te permite conducir motocicletas de hasta 125cc y 15 CV de potencia. Edad mínima: 16 años.", image: "/imagenes/Cursosmotoa1.png", imageClass: "permit-img-a1", caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Motos de 125cc de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado", "Maniobras avanzadas y circulación segura en vías urbanas e interurbanas"] },
-    a2: { badge: "Permiso A2", title: "-Información del Permiso A2", description: "El permiso A2 te habilita para conducir motocicletas de hasta 35 kW (47 CV). Edad mínima: 18 años.", image: "/imagenes/A2-info.png", imageClass: "permit-img-a2", caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Motos de media cilindrada de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado", "Maniobras profesionales y circulación en todo tipo de vías"] },
-    a: { badge: "Permiso A", title: "Información sobre Permiso A", description: "El permiso A te permite conducir cualquier motocicleta sin restricciones. Edad mínima: 20 años (con A2 previo) o 24 años.", image: "/imagenes/A-info.png", imageClass: "permit-img-a", caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Motos de alta cilindrada de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado"] },
+    am:  { badge: "Permiso AM",  title: "-Información del Permiso AM",  description: "El permiso AM es el carnet más básico de moto. Permite conducir ciclomotores pequeños, ideales para moverse por ciudad. Edad mínima: 15 años.", image: "/imagenes/Cursosmoto.png",    imageClass: "permit-img-am",  caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Ciclomotores de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado", "Maniobras básicas y circulación segura en ciudad"] },
+    a1:  { badge: "Permiso A1",  title: "-Información del Permiso A1",  description: "El permiso A1 te permite conducir motocicletas de hasta 125cc y 15 CV de potencia. Edad mínima: 16 años.",                                       image: "/imagenes/Cursosmotoa1.png", imageClass: "permit-img-a1",  caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Motos de 125cc de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado", "Maniobras avanzadas y circulación segura en vías urbanas e interurbanas"] },
+    a2:  { badge: "Permiso A2",  title: "-Información del Permiso A2",  description: "El permiso A2 te habilita para conducir motocicletas de hasta 35 kW (47 CV). Edad mínima: 18 años.",                                               image: "/imagenes/A2-info.png",      imageClass: "permit-img-a2",  caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Motos de media cilindrada de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado", "Maniobras profesionales y circulación en todo tipo de vías"] },
+    a:   { badge: "Permiso A",   title: "Información sobre Permiso A",  description: "El permiso A te permite conducir cualquier motocicleta sin restricciones. Edad mínima: 20 años (con A2 previo) o 24 años.",                           image: "/imagenes/A-info.png",       imageClass: "permit-img-a",   caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Motos de alta cilindrada de última generación para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Superar el test psicotécnico en un centro médico autorizado"] },
   };
   const permisosInfoCoches = {
-    b: { badge: "Permiso B", title: "Información sobre Permiso B", description: "El permiso B te permite conducir turismos y vehículos de hasta 3.500 kg. Edad mínima: 18 años.", image: "/imagenes/coche.png", imageClass: "permit-img-b", caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Vehículos modernos para tu aprendizaje", "Superar con éxito el examen práctico de circulación", "Superar el test psicotécnico en un centro médico autorizado", "Formación completa en circulación urbana e interurbana"] },
-    be: { badge: "Permiso B+E", title: "Información del Permiso B+E", description: "El permiso B+E te habilita para conducir turismos con remolques de más de 750 kg. Requiere tener el permiso B.", image: "/imagenes/BE-info.png", imageClass: "permit-img-be", caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Práctica con vehículos y remolques reales", "Superar con éxito el examen práctico de maniobras", "Maniobras específicas con remolque", "Formación en marcha atrás y estacionamiento con remolque"] },
+    b:   { badge: "Permiso B",   title: "Información sobre Permiso B",  description: "El permiso B te permite conducir turismos y vehículos de hasta 3.500 kg. Edad mínima: 18 años.",                          image: "/imagenes/coche.png",   imageClass: "permit-img-b",  caracteristicas: ["Al aprobar te daremos la V-13 (L)", "Pruebas de test oficiales de la DGT", "Vehículos modernos para tu aprendizaje", "Superar con éxito el examen práctico de circulación", "Superar el test psicotécnico en un centro médico autorizado", "Formación completa en circulación urbana e interurbana"] },
+    be:  { badge: "Permiso B+E", title: "Información del Permiso B+E",  description: "El permiso B+E te habilita para conducir turismos con remolques de más de 750 kg. Requiere tener el permiso B.",          image: "/imagenes/BE-info.png", imageClass: "permit-img-be", caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Práctica con vehículos y remolques reales", "Superar con éxito el examen práctico de maniobras", "Maniobras específicas con remolque", "Formación en marcha atrás y estacionamiento con remolque"] },
   };
   const permisosInfoCamiones = {
-    c: { badge: "Permiso C", title: "Información sobre Permiso C", description: "El permiso C te permite conducir camiones de más de 3.500 kg. Edad mínima: 21 años (18 con CAP).", image: "/imagenes/C-info.png", imageClass: "permit-img-c", caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Práctica con camiones profesionales", "Superar con éxito el examen práctico de circulación", "Superar el test psicotécnico en un centro médico autorizado", "Formación profesional especializada"] },
-    c1: { badge: "Permiso C1", title: "-Información del Permiso C1", description: "El permiso C1 te habilita para conducir camiones ligeros de entre 3.500 y 7.500 kg. Edad mínima: 18 años.", image: "/imagenes/C1-info.png", imageClass: "permit-img-c1", caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Camiones ligeros para tu aprendizaje", "Superar con éxito el examen práctico", "Superar el test psicotécnico en un centro médico autorizado", "Formación en conducción de vehículos pesados"] },
-    c1e: { badge: "Permiso C1+E", title: "Información del Permiso C1+E", description: "El permiso C1+E te permite conducir camiones ligeros con remolque. Requiere permiso C1.", image: "/imagenes/C1E-info.png", imageClass: "permit-img-c1e", caracteristicas: ["Permiso C1 previo obligatorio", "Pruebas de test oficiales de la DGT", "Práctica con remolques profesionales", "Superar con éxito el examen práctico de maniobras", "Maniobras específicas con remolque", "Formación profesional especializada"] },
-    ce: { badge: "Permiso CE", title: "-Información del Permiso CE", description: "El permiso CE permite conducir cualquier camión con remolque. Requiere permiso C.", image: "/imagenes/CE-info.png", imageClass: "permit-img-ce", caracteristicas: ["Permiso C previo obligatorio", "Pruebas de test oficiales de la DGT", "Camiones articulados para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Maniobras complejas con remolque", "Máximo nivel de formación profesional"] },
+    c:   { badge: "Permiso C",   title: "Información sobre Permiso C",  description: "El permiso C te permite conducir camiones de más de 3.500 kg. Edad mínima: 21 años (18 con CAP).",                           image: "/imagenes/C-info.png",   imageClass: "permit-img-c",   caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Práctica con camiones profesionales", "Superar con éxito el examen práctico de circulación", "Superar el test psicotécnico en un centro médico autorizado", "Formación profesional especializada"] },
+    c1:  { badge: "Permiso C1",  title: "-Información del Permiso C1",  description: "El permiso C1 te habilita para conducir camiones ligeros de entre 3.500 y 7.500 kg. Edad mínima: 18 años.",                  image: "/imagenes/C1-info.png",  imageClass: "permit-img-c1",  caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Camiones ligeros para tu aprendizaje", "Superar con éxito el examen práctico", "Superar el test psicotécnico en un centro médico autorizado", "Formación en conducción de vehículos pesados"] },
+    c1e: { badge: "Permiso C1+E",title: "Información del Permiso C1+E", description: "El permiso C1+E te permite conducir camiones ligeros con remolque. Requiere permiso C1.",                                      image: "/imagenes/C1E-info.png", imageClass: "permit-img-c1e", caracteristicas: ["Permiso C1 previo obligatorio", "Pruebas de test oficiales de la DGT", "Práctica con remolques profesionales", "Superar con éxito el examen práctico de maniobras", "Maniobras específicas con remolque", "Formación profesional especializada"] },
+    ce:  { badge: "Permiso CE",  title: "-Información del Permiso CE",  description: "El permiso CE permite conducir cualquier camión con remolque. Requiere permiso C.",                                             image: "/imagenes/CE-info.png",  imageClass: "permit-img-ce",  caracteristicas: ["Permiso C previo obligatorio", "Pruebas de test oficiales de la DGT", "Camiones articulados para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Maniobras complejas con remolque", "Máximo nivel de formación profesional"] },
   };
   const permisosInfoAutobuses = {
-    d: { badge: "Permiso D", title: "Información sobre Permiso D", description: "El permiso D te permite conducir autobuses de más de 9 plazas. Edad mínima: 24 años (21 con CAP).", image: "/imagenes/D-info.png", imageClass: "permit-img-d", caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Autobuses profesionales para tu aprendizaje", "Superar con éxito el examen práctico de circulación", "Superar el test psicotécnico en un centro médico autorizado", "Formación especializada en transporte de pasajeros"] },
-    de: { badge: "Permiso D+E", title: "Información del Permiso D+E", description: "El permiso D+E te habilita para conducir autobuses con remolque de más de 750 kg. Requiere permiso D.", image: "/imagenes/DE-info.png", imageClass: "permit-img-de", caracteristicas: ["Permiso D previo obligatorio", "Pruebas de test oficiales de la DGT", "Autobuses articulados para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Maniobras específicas con remolque", "Formación profesional de alto nivel"] },
-    d1e: { badge: "Permiso D1+E", title: "Información del Permiso D1+E", description: "El permiso D1+E te permite conducir minibuses con remolque. Requiere permiso D1.", image: "/imagenes/D1E-info.png", imageClass: "permit-img-d1e", caracteristicas: ["Permiso D1 previo obligatorio", "Pruebas de test oficiales de la DGT", "Minibuses con remolque para tu aprendizaje", "Superar con éxito el examen práctico", "Maniobras con remolque", "Formación profesional especializada"] },
+    d:   { badge: "Permiso D",   title: "Información sobre Permiso D",  description: "El permiso D te permite conducir autobuses de más de 9 plazas. Edad mínima: 24 años (21 con CAP).",                      image: "/imagenes/D-info.png",   imageClass: "permit-img-d",   caracteristicas: ["Permiso B previo obligatorio", "Pruebas de test oficiales de la DGT", "Autobuses profesionales para tu aprendizaje", "Superar con éxito el examen práctico de circulación", "Superar el test psicotécnico en un centro médico autorizado", "Formación especializada en transporte de pasajeros"] },
+    de:  { badge: "Permiso D+E", title: "Información del Permiso D+E",  description: "El permiso D+E te habilita para conducir autobuses con remolque de más de 750 kg. Requiere permiso D.",              image: "/imagenes/DE-info.png",  imageClass: "permit-img-de",  caracteristicas: ["Permiso D previo obligatorio", "Pruebas de test oficiales de la DGT", "Autobuses articulados para tu aprendizaje", "Superar con éxito el examen práctico de maniobras", "Maniobras específicas con remolque", "Formación profesional de alto nivel"] },
+    d1e: { badge: "Permiso D1+E",title: "Información del Permiso D1+E", description: "El permiso D1+E te permite conducir minibuses con remolque. Requiere permiso D1.",                                   image: "/imagenes/D1E-info.png", imageClass: "permit-img-d1e", caracteristicas: ["Permiso D1 previo obligatorio", "Pruebas de test oficiales de la DGT", "Minibuses con remolque para tu aprendizaje", "Superar con éxito el examen práctico", "Maniobras con remolque", "Formación profesional especializada"] },
   };
   const permisosInfoCAP = {
     cap: { badge: "CAP", title: "-Información del CAP", description: "El Certificado de Aptitud Profesional es obligatorio para conductores profesionales de mercancías y viajeros.", image: "/imagenes/cap.webp", imageClass: "permit-img-cap", caracteristicas: ["140 horas de formación inicial", "Cursos de actualización cada 5 años", "Simulador de conducción profesional", "Certificación oficial de la DGT", "Válido en toda la Unión Europea", "Formación en seguridad vial y primeros auxilios"] },
   };
 
+  // ── Carrito ───────────────────────────────────────────────────
   const addToCart = (item) => {
-  const cartItem = {
-    id: Date.now(),
-    category: selectedCategory,
-    courseName: cursosData[selectedCourse].name,
-    package: item,
-    paqueteKey: `${item.id}-${selectedCourse}`,
-    carnetId: selectedCarnet,   // ← añade esta línea
-    extraClass,
-    total: item.price + (extraClass ? 25 : 0),
+    const cartItem = {
+      id: Date.now(),
+      category: selectedCategory,
+      courseName: cursosData[selectedCourse].name,
+      package: item,
+      paqueteKey: `${item.id}-${selectedCourse}`,
+      carnetId: selectedCarnet,
+      extraClass,
+      total: item.price + (extraClass ? 25 : 0),
+    };
+    setCart([...cart, cartItem]);
+    alert("Paquete añadido al carrito");
   };
-  setCart([...cart, cartItem]);
-  alert("Paquete añadido al carrito");
-};
 
   const removeFromCart = (id) => setCart(cart.filter(item => item.id !== id));
 
@@ -285,16 +254,20 @@ function Cursos() {
   const resetCategory = () => setSelectedCategory(null);
 
   const getPermisoInfo = () => {
-    if (selectedCourse === "motos" && selectedCarnet && permisosInfoMotos[selectedCarnet]) return permisosInfoMotos[selectedCarnet];
-    if (selectedCourse === "coches" && selectedCarnet && permisosInfoCoches[selectedCarnet]) return permisosInfoCoches[selectedCarnet];
-    if (selectedCourse === "camiones" && selectedCarnet && permisosInfoCamiones[selectedCarnet]) return permisosInfoCamiones[selectedCarnet];
-    if (selectedCourse === "autobuses" && selectedCarnet && permisosInfoAutobuses[selectedCarnet]) return permisosInfoAutobuses[selectedCarnet];
-    if (selectedCourse === "profesional" && selectedCarnet && permisosInfoCAP[selectedCarnet]) return permisosInfoCAP[selectedCarnet];
-    if (selectedCourse === "recuperacion" && selectedCarnet && permisosInfoRecuperacion[selectedCarnet]) return permisosInfoRecuperacion[selectedCarnet];
+    if (selectedCourse === "motos"        && selectedCarnet && permisosInfoMotos[selectedCarnet])       return permisosInfoMotos[selectedCarnet];
+    if (selectedCourse === "coches"       && selectedCarnet && permisosInfoCoches[selectedCarnet])      return permisosInfoCoches[selectedCarnet];
+    if (selectedCourse === "camiones"     && selectedCarnet && permisosInfoCamiones[selectedCarnet])    return permisosInfoCamiones[selectedCarnet];
+    if (selectedCourse === "autobuses"    && selectedCarnet && permisosInfoAutobuses[selectedCarnet])   return permisosInfoAutobuses[selectedCarnet];
+    if (selectedCourse === "profesional"  && selectedCarnet && permisosInfoCAP[selectedCarnet])         return permisosInfoCAP[selectedCarnet];
+    if (selectedCourse === "recuperacion" && selectedCarnet && permisosInfoRecuperacion[selectedCarnet])return permisosInfoRecuperacion[selectedCarnet];
     return null;
   };
 
-  const handleCompraCompletada = () => { setShowSuccessPopup(true); setCart([]); };
+  // ── Redirigir al login guardando el carrito ───────────────────
+  const irAlLoginConCarrito = () => {
+    sessionStorage.setItem("carritoAntesDePagar", JSON.stringify(cart));
+    navigate("/login");
+  };
 
   // ── Navbar ────────────────────────────────────────────────────
   const Navbar = () => (
@@ -371,11 +344,11 @@ function Cursos() {
   const SuccessPopup = () => (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
       <div style={{ background: 'white', borderRadius: '24px', padding: '60px 50px', maxWidth: '500px', width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', border: '5px solid #032856' }}>
-        <div style={{ fontSize: '80px', marginBottom: '20px' }}></div>
+        <div style={{ fontSize: '80px', marginBottom: '20px' }}>🎉</div>
         <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#014495', fontFamily: 'Poppins, sans-serif', marginBottom: '15px' }}>¡Compra realizada!</h2>
         <p style={{ fontSize: '18px', color: '#423e3e', fontFamily: 'Poppins, sans-serif', marginBottom: '10px', lineHeight: '1.6' }}>Tu matrícula ha sido procesada correctamente. Bienvenido a Autoescuela Villarey</p>
-        <p style={{ fontSize: '15px', color: '#4c4242', fontFamily: 'Poppins, sans-serif', marginBottom: '35px' }}>Recibirás un correo con todos los detalles de tu curso.</p>
-        <button onClick={() => { setShowSuccessPopup(false); setShowCart(false); navigate('/'); }} style={{ backgroundColor: '#014495', color: 'white', border: 'none', borderRadius: '14px', padding: '16px 40px', fontSize: '17px', fontWeight: '800', cursor: 'pointer', fontFamily: 'Poppins, sans-serif' }}>Volver al inicio</button>
+        <p style={{ fontSize: '15px', color: '#4c4242', fontFamily: 'Poppins, sans-serif', marginBottom: '35px' }}>Redirigiendo a tu área de alumno…</p>
+        {/* La redirección la hace PagoPayPal.jsx automáticamente */}
       </div>
     </div>
   );
@@ -412,35 +385,46 @@ function Cursos() {
                   </div>
                 ))}
               </div>
+
               <div className="cart-summary">
                 <h2>Detalles de tu compra</h2>
                 <div className="summary-row"><span>Subtotal</span><span>{getTotalCart()}€</span></div>
                 <div className="summary-row total"><span>TOTAL</span><span>{getTotalCart()}€</span></div>
+
+                {/* ── Si NO está logueado: guardar carrito e ir al login ── */}
                 {!estaLogueado ? (
                   <>
-                    <button className="checkout-btn" onClick={() => navigate('/login')}>Iniciar sesión para pagar</button>
-                    <p style={{ textAlign: 'center', fontSize: '17px', color: '#494444', marginTop: '10px' }}>Debes iniciar sesión para completar la compra</p>
+                    <button
+                      className="checkout-btn"
+                      onClick={irAlLoginConCarrito}
+                    >
+                      Iniciar sesión para pagar
+                    </button>
+                    <p style={{ textAlign: 'center', fontSize: '17px', color: '#494444', marginTop: '10px' }}>
+                      Debes iniciar sesión para completar la compra
+                    </p>
                   </>
                 ) : (
-                  <>
-                    {showSuccessPopup ? (
-                      <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <div style={{ fontSize: '50px' }}></div>
-                        <h3 style={{ color: '#014495', fontFamily: 'Poppins', marginTop: '10px' }}>¡Pago completado!</h3>
-                        <p style={{ color: '#555', fontSize: '14px', margin: '10px 0 20px' }}>Tu matrícula ha sido procesada correctamente.</p>
-                        <button className="checkout-btn" onClick={() => { setShowSuccessPopup(false); setShowCart(false); navigate('/'); }}>Volver al inicio</button>
-                      </div>
-                    ) : (
-                      <PagoPayPal
-                        precio={getTotalCart()}
-                        idPaquete={PAQUETE_IDS[cart[0]?.paqueteKey] ?? 1}
-                        tipoPaquete={cart[0]?.package?.name ?? ""}      // ej: "Paquete Básico"
-                        tipoCarnet={cart[0]?.carnetId ?? selectedCarnet ?? "B"}  // ej: "B", "AM"…
-                        onPagoExitoso={() => { setShowSuccessPopup(true); setCart([]); }}
-                        onPagoError={(msg) => alert('Error en el pago: ' + msg)}
-                      />
-                    )}
-                  </>
+                  /* ── Si está logueado: mostrar PayPal ── */
+                  showSuccessPopup ? (
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                      <div style={{ fontSize: '50px' }}>🎉</div>
+                      <h3 style={{ color: '#014495', fontFamily: 'Poppins', marginTop: '10px' }}>¡Pago completado!</h3>
+                      <p style={{ color: '#555', fontSize: '14px', margin: '10px 0 20px' }}>Tu matrícula ha sido procesada correctamente.</p>
+                    </div>
+                  ) : (
+                    <PagoPayPal
+                      precio={getTotalCart()}
+                      idPaquete={PAQUETE_IDS[cart[0]?.paqueteKey] ?? 1}
+                      tipoPaquete={cart[0]?.package?.name ?? ""}
+                      tipoCarnet={cart[0]?.carnetId ?? selectedCarnet ?? "B"}
+                      onPagoExitoso={() => {
+                        setShowSuccessPopup(true);
+                        setCart([]);
+                      }}
+                      onPagoError={(msg) => alert('Error en el pago: ' + msg)}
+                    />
+                  )
                 )}
                 <p className="secure-payment">Pago 100% seguro con Autoescuela Villarey</p>
               </div>
@@ -495,7 +479,6 @@ function Cursos() {
                   ))}
                 </ul>
               </div>
-              {/* No mostrar clase especial extra en recuperación */}
               {!esRecuperacion && (
                 <>
                   <div className="pd-divider" />
@@ -579,7 +562,6 @@ function Cursos() {
             ))}
           </div>
 
-          {/* Clase especial solo si no es recuperación */}
           {selectedCourse !== 'recuperacion' && (
             <div className="special-lesson-container">
               <div className="lesson-details-wrapper">

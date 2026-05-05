@@ -298,7 +298,7 @@ export function GraficasPanel() {
       <div className="grafica-bloque grafica-bloque--doble">
         <div className="grafica-cabecera">
           <h3 className="grafica-titulo">Carnets más vendidos</h3>
-          <span className="grafica-subtitulo">Distribución total · datos de ejemplo</span>
+          <span className="grafica-subtitulo">Distribución total.</span>
         </div>
         <div className="grafica-contenido">
           <GraficaPastel />
@@ -309,7 +309,7 @@ export function GraficasPanel() {
       <div className="grafica-bloque grafica-bloque--full">
         <div className="grafica-cabecera">
           <h3 className="grafica-titulo">Ingresos por mes</h3>
-          <span className="grafica-subtitulo">Total anual: {totalIngresos} · datos de ejemplo</span>
+          <span className="grafica-subtitulo">Total anual: {totalIngresos}</span>
         </div>
         <div className="grafica-contenido">
           <GraficaIngresos />
