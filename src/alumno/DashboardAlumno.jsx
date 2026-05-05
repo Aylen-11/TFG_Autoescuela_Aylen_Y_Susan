@@ -245,7 +245,7 @@ function TarjetaProfesor({ profesor }) {
 }
 
 function formatFecha(str) {
-  if (!str) return "---";                          // si no hay fecha no devuelve nada osea ---
+  if (!str) return "-";                          // si no hay fecha no devuelve nada osea ---
   const [y, m, d] = str.split("-");            
   const fecha = new Date(y, m - 1, d);          
   return fecha.toLocaleDateString("es-ES", {
